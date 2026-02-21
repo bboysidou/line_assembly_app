@@ -10,14 +10,19 @@ dotenv.config();
 
 const { AUTH_SECRET, ENV } = process.env;
 
+const isProduction = ENV === "production";
+
 export const sessionMiddleware = session({
   store: new SessionStore(db_client, redisClient),
   secret: AUTH_SECRET as string,
   resave: false,
   saveUninitialized: false,
+  name: "connect.sid",
   cookie: {
     maxAge: SESSION_EXPIRATION,
     httpOnly: true,
-    secure: ENV !== "dev",
+    secure: isProduction ? true : false,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
   },
 });

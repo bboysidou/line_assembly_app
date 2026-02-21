@@ -6,6 +6,9 @@ import errorMiddleware from "./core/middleware/error.middleware";
 import { sessionMiddleware } from "./core/middleware/session.middleware";
 import { UPLOAD_DIR } from "./core/helpers/constants";
 import { authRouter } from "./routes/auth/presentation/auth.route";
+import { clientsRouter } from "./routes/clients/presentation/clients.route";
+import { ordersRouter } from "./routes/orders/presentation/orders.route";
+import { assemblyRouter } from "./routes/assembly/presentation/assembly.route";
 
 dotenv.config();
 
@@ -54,6 +57,9 @@ app.use("/media", express.static(UPLOAD_DIR));
 
 // ROUTES
 app.use(`${BASE_URL}/auth`, authRouter);
+app.use(`${BASE_URL}/clients`, clientsRouter);
+app.use(`${BASE_URL}/orders`, ordersRouter);
+app.use(`${BASE_URL}/assembly`, assemblyRouter);
 
 // ERROR MIDDLEWARE
 app.use(errorMiddleware);

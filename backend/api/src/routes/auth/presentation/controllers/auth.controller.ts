@@ -21,7 +21,16 @@ export class AuthController {
 
       const result = await loginUsecase.execute(validate.data);
       req.session.user = { id_user: result.id_user };
-      res.json(result);
+      
+      // Save session before sending response
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          next(err);
+          return;
+        }
+        res.json(result);
+      });
     } catch (error) {
       next(error);
     }
@@ -39,7 +48,16 @@ export class AuthController {
 
       const result = await registerUsecase.execute(validate.data);
       req.session.user = { id_user: result.id_user };
-      res.json(result);
+      
+      // Save session before sending response
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          next(err);
+          return;
+        }
+        res.json(result);
+      });
     } catch (error) {
       next(error);
     }
@@ -47,6 +65,7 @@ export class AuthController {
 
   async onSessionController(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log(req.sessionID);
       if (req.sessionID === null || req.sessionID === undefined) {
         req.session.destroy(() => {});
         throw new UnauthorizedError("Not authorized");
@@ -70,6 +89,7 @@ export class AuthController {
         req.session.destroy(() => {});
         throw new UnauthorizedError("Not authorized");
       }
+      
       const result = await logoutUsecase.execute(req.sessionID);
 
       if (result === null || result === undefined) {
@@ -77,7 +97,13 @@ export class AuthController {
         throw new UnauthorizedError("Not authorized");
       }
 
-      res.json(result);
+      // Destroy session after logout
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destroy error:", err);
+        }
+        res.json(result);
+      });
     } catch (error) {
       next(error);
     }
