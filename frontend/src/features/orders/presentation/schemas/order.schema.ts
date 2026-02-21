@@ -15,14 +15,10 @@ export const OrderStatusEnumList = Object.values(OrderStatusEnum);
 export const orderSchema = z.object({
   id_order: z.string({ message: "ID is required" }),
   id_client: z.string().optional(),
-  order_number: z.string({ message: "Order number is required" }),
-  product_name: z.string({ message: "Product name is required" }),
-  quantity: z
-    .number({ message: "Quantity is required" })
-    .min(1, "Quantity must be at least 1"),
-  status: z
-    .enum(OrderStatusEnumList, { message: "Status is required" })
-    .default(OrderStatusEnum.PENDING),
+  order_number: z.string().min(1, "Order number is required"),
+  product_name: z.string().min(1, "Product name is required"),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
+  status: z.enum(OrderStatusEnumList),
   notes: z.string().optional(),
   created_at: z.date().optional(),
   updated_at: z.date().optional(),

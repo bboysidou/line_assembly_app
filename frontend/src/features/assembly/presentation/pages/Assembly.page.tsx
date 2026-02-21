@@ -1,15 +1,25 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Loader2, Play, Clock, Package, Circle, ArrowRight } from "lucide-react";
 import { onGetAllStepsAction, onStartStepAction } from "../actions/assembly.action";
-import type { StartStepSchemaType } from "../schemas/assembly.schema";
+import { startStepSchema, type StartStepSchemaType } from "../schemas/assembly.schema";
 
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const cardVariants = { hidden: { opacity: 0, y: 20, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1 } };
@@ -19,12 +29,32 @@ const stepNames = ["Cutting", "Welding", "Painting", "Assembly", "Quality Check"
 const AssemblyPage = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<StartStepSchemaType>({ id_order: "", id_step: 1 });
 
-  const { isLoading: stepsLoading } = useQuery({ queryKey: ["assemblySteps"], queryFn: onGetAllStepsAction });
-  const startMutation = useMutation({ mutationFn: onStartStepAction, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["orderProgress"] }); setIsDialogOpen(false); setFormData({ id_order: "", id_step: 1 }); } });
+  const form = useForm<StartStepSchemaType>({
+    resolver: zodResolver(startStepSchema),
+    defaultValues: {
+      id_order: "",
+      id_step: 1,
+    },
+  });
 
-  const handleStart = (e: React.FormEvent) => { e.preventDefault(); startMutation.mutate(formData); };
+  const { isLoading: stepsLoading } = useQuery({ queryKey: ["assemblySteps"], queryFn: onGetAllStepsAction, refetchOnMount: true });
+  const startMutation = useMutation({
+    mutationFn: onStartStepAction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orderProgress"] });
+      setIsDialogOpen(false);
+      form.reset();
+      toast.success("Step started successfully");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to start step", { description: error.message });
+    },
+  });
+
+  const onSubmit = (data: StartStepSchemaType) => {
+    startMutation.mutate(data);
+  };
 
   return (
     <motion.div className="p-6 space-y-6" initial="hidden" animate="visible" variants={containerVariants}>
@@ -41,20 +71,46 @@ const AssemblyPage = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Start Assembly Step</DialogTitle></DialogHeader>
-            <form onSubmit={handleStart} className="space-y-4">
-              <div className="space-y-2"><Label>Order ID</Label><Input value={formData.id_order} onChange={e => setFormData({...formData, id_order: e.target.value})} placeholder="Enter order ID" required /></div>
-              <div className="space-y-2"><Label>Step</Label>
-                <Select value={String(formData.id_step)} onValueChange={v => setFormData({...formData, id_step: parseInt(v)})}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {stepNames.map((name, i) => <SelectItem key={i} value={String(i + 1)}>{name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-orange-600 to-amber-600" disabled={startMutation.isPending}>
-                {startMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null} Start Step
-              </Button>
-            </form>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="id_order"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Order ID</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter order ID" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="id_step"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Step</FormLabel>
+                      <Select onValueChange={(v) => field.onChange(parseInt(v))} defaultValue={String(field.value)}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a step" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {stepNames.map((name, i) => <SelectItem key={i} value={String(i + 1)}>{name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full bg-gradient-to-r from-orange-600 to-amber-600" disabled={startMutation.isPending}>
+                  {startMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null} Start Step
+                </Button>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </motion.div>

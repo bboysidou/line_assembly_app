@@ -9,6 +9,7 @@ import { authRouter } from "./routes/auth/presentation/auth.route";
 import { clientsRouter } from "./routes/clients/presentation/clients.route";
 import { ordersRouter } from "./routes/orders/presentation/orders.route";
 import { assemblyRouter } from "./routes/assembly/presentation/assembly.route";
+import { dashboardRouter } from "./routes/dashboard/presentation/dashboard.route";
 
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use(`${BASE_URL}/auth`, authRouter);
 app.use(`${BASE_URL}/clients`, clientsRouter);
 app.use(`${BASE_URL}/orders`, ordersRouter);
 app.use(`${BASE_URL}/assembly`, assemblyRouter);
+app.use(`${BASE_URL}/dashboard`, dashboardRouter);
 
 // ERROR MIDDLEWARE
 app.use(errorMiddleware);

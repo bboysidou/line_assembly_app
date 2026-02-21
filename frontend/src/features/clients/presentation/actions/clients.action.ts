@@ -11,6 +11,10 @@ import type {
   UpdateClientSchemaType,
   ClientSchemaType,
 } from "../schemas/clients.schema";
+import { QUERY_KEYS } from "@/core/http/type";
+
+// Query Keys - Export for use in components
+export const clientKeys = QUERY_KEYS.CLIENTS;
 
 // Query Actions
 export const onGetAllClientsAction = async (): Promise<ClientSchemaType[]> => {

@@ -1,3 +1,4 @@
+// orders.action.ts
 import {
   createOrderUsecase,
   getAllOrdersUsecase,
@@ -10,6 +11,10 @@ import type {
   UpdateOrderSchemaType,
   OrderSchemaType,
 } from "../schemas/order.schema";
+import { QUERY_KEYS } from "@/core/http/type";
+
+// Query Keys - Export for use in components
+export const orderKeys = QUERY_KEYS.ORDERS;
 
 // Query Actions
 export const onGetAllOrdersAction = async (): Promise<OrderSchemaType[]> => {

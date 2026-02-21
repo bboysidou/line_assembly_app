@@ -1,9 +1,9 @@
 import AuthPage from "@/features/auth/presentation/pages/Auth.page";
 import { PathManager } from "./path_manager.route";
-import DashboardPage from "@/features/dashboard/presentation/components/Dashboard.page";
 import ClientsPage from "@/features/clients/presentation/pages/Clients.page";
 import OrdersPage from "@/features/orders/presentation/pages/Orders.page";
 import AssemblyPage from "@/features/assembly/presentation/pages/Assembly.page";
+import DashboardPage from "@/features/dashboard/presentation/pages/Dashboard.page";
 
 interface Route {
   path: string;

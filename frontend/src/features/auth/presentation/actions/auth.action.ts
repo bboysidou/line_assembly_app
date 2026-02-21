@@ -1,3 +1,4 @@
+// auth.action.ts
 import {
   loginUsecase,
   logoutUsecase,
@@ -5,7 +6,12 @@ import {
   sessionUsecase,
 } from "@/core/dependency_injections/auth.di";
 import type { LoginType, RegisterType, UserType } from "../schemas/auth.schema";
+import { QUERY_KEYS } from "@/core/http/type";
 
+// Query Keys - Export for use in components
+export const authKeys = QUERY_KEYS.AUTH;
+
+// Mutation Actions
 export const onLoginAction = async (user: LoginType): Promise<UserType> => {
   try {
     const data = await loginUsecase.execute(user);

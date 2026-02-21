@@ -1,3 +1,4 @@
+// assembly.action.ts
 import {
   getAllStepsUsecase,
   getOrderProgressUsecase,
@@ -9,6 +10,10 @@ import type {
   StartStepSchemaType,
   CompleteStepSchemaType,
 } from "../schemas/assembly.schema";
+import { QUERY_KEYS } from "@/core/http/type";
+
+// Query Keys - Export for use in components
+export const assemblyKeys = QUERY_KEYS.ASSEMBLY;
 
 // Query Actions
 export const onGetAllStepsAction = async () => {

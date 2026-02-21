@@ -21,7 +21,7 @@ export class AuthController {
 
       const result = await loginUsecase.execute(validate.data);
       req.session.user = { id_user: result.id_user };
-      
+
       // Save session before sending response
       req.session.save((err) => {
         if (err) {
@@ -48,7 +48,7 @@ export class AuthController {
 
       const result = await registerUsecase.execute(validate.data);
       req.session.user = { id_user: result.id_user };
-      
+
       // Save session before sending response
       req.session.save((err) => {
         if (err) {
@@ -65,7 +65,6 @@ export class AuthController {
 
   async onSessionController(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log(req.sessionID);
       if (req.sessionID === null || req.sessionID === undefined) {
         req.session.destroy(() => {});
         throw new UnauthorizedError("Not authorized");
@@ -89,7 +88,7 @@ export class AuthController {
         req.session.destroy(() => {});
         throw new UnauthorizedError("Not authorized");
       }
-      
+
       const result = await logoutUsecase.execute(req.sessionID);
 
       if (result === null || result === undefined) {

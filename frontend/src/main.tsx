@@ -9,7 +9,15 @@ import { Toaster } from "./components/ui/sonner.tsx";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./core/internationalization/i18n.ts";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      staleTime: 0,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
