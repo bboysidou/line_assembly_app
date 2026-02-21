@@ -26,4 +26,11 @@ export const resources: { [key in LangType]: ResourcesType } = {
     common: common.fr,
     sidebar: sidebar.fr,
   },
+
+  en: {
+    language: languages.en,
+    auth: auth.fr, // Use French as fallback
+    common: common.fr,
+    sidebar: sidebar.fr,
+  },
 };

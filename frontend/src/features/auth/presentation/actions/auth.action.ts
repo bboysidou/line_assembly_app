@@ -2,12 +2,24 @@ import {
   loginUsecase,
   logoutUsecase,
   registerUsecase,
+  sessionUsecase,
 } from "@/core/dependency_injections/auth.di";
 import type { LoginType, RegisterType, UserType } from "../schemas/auth.schema";
 
 export const onLoginAction = async (user: LoginType): Promise<UserType> => {
   try {
     const data = await loginUsecase.execute(user);
+    return data;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "An unexpected error occurred";
+    throw new Error(message);
+  }
+};
+
+export const onSessionAction = async (): Promise<UserType> => {
+  try {
+    const data = await sessionUsecase.execute();
     return data;
   } catch (error) {
     const message =

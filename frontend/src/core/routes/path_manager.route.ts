@@ -5,9 +5,13 @@ export const PathManager = {
 
   // PROTECTED PAGES
   DASHBOARD_PAGE: "/",
-  DATABASE_PAGE: "/database",
+  CLIENTS_PAGE: "/clients",
+  ORDERS_PAGE: "/orders",
+  ASSEMBLY_PAGE: "/assembly",
 
   // LINKS
   SIDEBAR_NAVIGATION_DASHBOARD: "/",
-  SIDEBAR_NAVIGATION_DATABASE: "/database",
+  SIDEBAR_NAVIGATION_CLIENTS: "/clients",
+  SIDEBAR_NAVIGATION_ORDERS: "/orders",
+  SIDEBAR_NAVIGATION_ASSEMBLY: "/assembly",
 };

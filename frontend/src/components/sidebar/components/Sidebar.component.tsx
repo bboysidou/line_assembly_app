@@ -7,12 +7,9 @@ import {
   MAX_WIDTH_MOBILE,
   useMediaQuery,
 } from "../context/hooks/useMediaQuery";
-import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import SidebarQuickAccessComponent from "./Sidebar.quickaccess.component";
 
 const SidebarComponent = () => {
-  const [tCommon] = useTranslation("common");
   const { collapsed, toggleSidebar } = useSidebar();
   const isMd = useMediaQuery(`(max-width: ${MAX_WIDTH}px)`);
   const isMobile = useMediaQuery(`(max-width: ${MAX_WIDTH_MOBILE}px)`);
@@ -52,7 +49,7 @@ const SidebarComponent = () => {
         <div className="h-[5dvh] flex flex-col items-start gap-2 overflow-hidden">
           <Link to="/" className="p-2 flex items-center md:items-start">
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
-              <span className="text-lg font-bold">GD</span>
+              <span className="text-lg font-bold">IZ</span>
             </div>
             <div
               className={cn(
@@ -62,10 +59,10 @@ const SidebarComponent = () => {
               )}
             >
               <span className="truncate font-semibold text-emerald-600">
-                {tCommon("KINDERGARTEN_NAME")}
+                IZDIHAR
               </span>
               <span className="truncate text-xs text-muted-foreground">
-                Manage projects & teams
+                Assembly Line
               </span>
             </div>
           </Link>

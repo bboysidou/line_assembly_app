@@ -1,6 +1,9 @@
 import AuthPage from "@/features/auth/presentation/pages/Auth.page";
 import { PathManager } from "./path_manager.route";
 import DashboardPage from "@/features/dashboard/presentation/components/Dashboard.page";
+import ClientsPage from "@/features/clients/presentation/pages/Clients.page";
+import OrdersPage from "@/features/orders/presentation/pages/Orders.page";
+import AssemblyPage from "@/features/assembly/presentation/pages/Assembly.page";
 
 interface Route {
   path: string;
@@ -18,5 +21,17 @@ export const protectedRoute: Route[] = [
   {
     path: PathManager.DASHBOARD_PAGE,
     children: <DashboardPage />,
+  },
+  {
+    path: PathManager.CLIENTS_PAGE,
+    children: <ClientsPage />,
+  },
+  {
+    path: PathManager.ORDERS_PAGE,
+    children: <OrdersPage />,
+  },
+  {
+    path: PathManager.ASSEMBLY_PAGE,
+    children: <AssemblyPage />,
   },
 ];

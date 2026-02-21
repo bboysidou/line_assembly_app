@@ -2,13 +2,22 @@
   "fr": {
     "CHANGE_LANGUAGE": "Changer la langue",
     "LANGUAGE": "Langue",
-    "FR": "Français",
-    "AR": "Arabe"
+    "FR": "Français",
+    "AR": "Arabe",
+    "EN": "Anglais"
   },
   "ar": {
     "CHANGE_LANGUAGE": "تغيير اللغة",
     "LANGUAGE": "اللغة",
     "FR": "الفرنسية",
-    "AR": "العربية"
+    "AR": "العربية",
+    "EN": "الإنجليزية"
+  },
+  "en": {
+    "CHANGE_LANGUAGE": "Change language",
+    "LANGUAGE": "Language",
+    "FR": "French",
+    "AR": "Arabic",
+    "EN": "English"
   }
 }
