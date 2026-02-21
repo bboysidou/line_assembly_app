@@ -7,6 +7,8 @@ import {
   MAX_WIDTH_MOBILE,
   useMediaQuery,
 } from "../context/hooks/useMediaQuery";
+import { motion } from "framer-motion";
+import DarkModeToggle from "@/components/theme/mode-toggle";
 
 const SidebarComponent = () => {
   const { collapsed, toggleSidebar } = useSidebar();
@@ -18,8 +20,11 @@ const SidebarComponent = () => {
     <>
       {/* Mobile Overlay */}
       {isMobile && !collapsed && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
           onClick={() => {
             toggleSidebar();
           }}
@@ -28,9 +33,9 @@ const SidebarComponent = () => {
 
       <aside
         className={cn(
-          "h-full flex p-4 flex-col items-center sm:items-start justify-between transition-all duration-300 z-50",
+          "h-full flex p-4 flex-col items-center sm:items-start justify-between transition-all duration-300 z-50 bg-sidebar border-r border-sidebar-border",
           isMobile && [
-            "fixed top-0 left-0 bg-background border-r",
+            "fixed top-0 left-0",
             collapsed
               ? "w-0 opacity-0 pointer-events-none p-0 -translate-x-full"
               : "w-[280px] opacity-100 translate-x-0",
@@ -41,50 +46,78 @@ const SidebarComponent = () => {
               ? isMd
                 ? "w-0 opacity-0 pointer-events-none p-0"
                 : "w-[70px]"
-              : "w-[70px] lg:w-[300px] opacity-100",
+              : "w-[70px] lg:w-[280px] opacity-100",
           ],
         )}
       >
-        <div className="h-[5dvh] flex flex-col items-start gap-2 overflow-hidden">
-          <Link to="/" className="p-2 flex items-center md:items-start">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
-              <span className="text-lg font-bold">OC</span>
-            </div>
+        {/* Logo Section */}
+        <div className="h-[5dvh] flex flex-col items-start gap-2 overflow-hidden w-full">
+          <Link to="/" className="p-2 flex items-center md:items-start w-full group">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex aspect-square size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25"
+            >
+              <span className="text-lg font-bold">LA</span>
+            </motion.div>
             <div
               className={cn(
-                "flex-col ml-2 text-left text-sm leading-tight",
+                "flex-col ml-3 text-left leading-tight",
                 isMobile ? "flex" : "hidden lg:flex",
                 !isMobile && collapsed && "lg:hidden",
               )}
             >
-              <span className="truncate font-semibold text-emerald-600">
-                Open
-                <span className="ml-[3px] text-foreground">Company</span>
+              <span className="truncate font-bold text-lg text-gradient">
+                Line Assembly
               </span>
               <span className="truncate text-xs text-muted-foreground">
-                Manage projects & teams
+                Production Management
               </span>
             </div>
           </Link>
         </div>
 
-        <nav className="h-[90dvh] lg:w-full flex flex-col items-center overflow-y-auto md:items-start">
-          <ul className="w-full overflow-y-auto">
-            <div className="mt-4">
-              {sidebarNavigation.map((item) => (
-                <li key={item.path} className="mb-2">
+        {/* Navigation */}
+        <nav className="h-[85dvh] lg:w-full flex flex-col items-center overflow-y-auto md:items-start">
+          <ul className="w-full overflow-y-auto space-y-1">
+            {sidebarNavigation.map((item, index) => {
+              const isActive = path.pathname === item.path;
+              return (
+                <motion.li 
+                  key={item.path}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
                   <Link
                     to={item.path}
                     className={cn(
-                      "flex items-center gap-2 text-foreground hover:bg-primary/20 p-2 rounded-md transition-all duration-300",
-                      path.pathname === item.path &&
-                        "text-emerald-600 hover:bg-primary/20",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                     )}
                   >
-                    {item.icon}
+                    {/* Active indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full"
+                      />
+                    )}
+                    
+                    <div className={cn(
+                      "flex items-center justify-center size-8 rounded-lg transition-colors",
+                      isActive 
+                        ? "bg-primary/10 text-primary" 
+                        : "text-muted-foreground group-hover:text-foreground group-hover:bg-muted"
+                    )}>
+                      {item.icon}
+                    </div>
+                    
                     <span
                       className={cn(
-                        "font-medium",
+                        "font-medium text-sm",
                         isMobile
                           ? "flex items-center"
                           : "hidden lg:flex md:items-center",
@@ -94,11 +127,31 @@ const SidebarComponent = () => {
                       {item.title}
                     </span>
                   </Link>
-                </li>
-              ))}
-            </div>
+                </motion.li>
+              );
+            })}
           </ul>
         </nav>
+
+        {/* Footer with Theme Toggle */}
+        <div className={cn(
+          "h-[5dvh] w-full flex items-center justify-center lg:justify-start border-t border-sidebar-border pt-4",
+          !isMobile && collapsed && "lg:justify-center"
+        )}>
+          <div className={cn(
+            "flex items-center gap-3",
+            !isMobile && collapsed && "lg:justify-center"
+          )}>
+            <DarkModeToggle />
+            <span className={cn(
+              "text-sm text-muted-foreground",
+              isMobile ? "flex" : "hidden lg:flex",
+              !isMobile && collapsed && "lg:hidden"
+            )}>
+              Theme
+            </span>
+          </div>
+        </div>
       </aside>
     </>
   );

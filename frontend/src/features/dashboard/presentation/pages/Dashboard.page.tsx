@@ -65,15 +65,37 @@ const DashboardPage = () => {
   const { effectiveTheme } = useTheme();
   const isDark = effectiveTheme === "dark";
   
-  // Chart colors that adapt to dark mode
+  // Chart colors that adapt to dark mode using CSS variables
   const chartColors = {
-    grid: isDark ? "#374151" : "#e2e8f0",
-    axis: isDark ? "#9ca3af" : "#64748b",
+    grid: isDark ? "rgba(148, 163, 184, 0.1)" : "rgba(148, 163, 184, 0.2)",
+    axis: isDark ? "#94a3b8" : "#64748b",
     tooltip: {
-      bg: isDark ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
-      border: isDark ? "#4b5563" : "#e2e8f0",
-      shadow: isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-      text: isDark ? "#f9fafb" : "#1f2937",
+      bg: isDark ? "rgba(30, 41, 59, 0.95)" : "rgba(255, 255, 255, 0.98)",
+      border: isDark ? "rgba(99, 102, 241, 0.3)" : "rgba(99, 102, 241, 0.2)",
+      shadow: isDark ? "0 8px 32px -8px rgba(0, 0, 0, 0.5)" : "0 8px 32px -8px rgba(0, 0, 0, 0.15)",
+      text: isDark ? "#f1f5f9" : "#1e293b",
+    },
+    // Primary palette based on design system
+    primary: {
+      main: "#6366f1",
+      light: "#818cf8",
+      dark: "#4f46e5",
+    },
+    success: {
+      main: "#22c55e",
+      light: "#4ade80",
+    },
+    warning: {
+      main: "#f59e0b",
+      light: "#fbbf24",
+    },
+    info: {
+      main: "#3b82f6",
+      light: "#60a5fa",
+    },
+    destructive: {
+      main: "#ef4444",
+      light: "#f87171",
     },
   };
 
@@ -142,542 +164,534 @@ const DashboardPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <motion.div
-      className="p-6 space-y-6"
+      className="p-6 space-y-6 max-w-[1600px] mx-auto"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
+      {/* Header */}
       <motion.div variants={cardVariants}>
-        <h1 className="text-3xl font-bold bg-linear-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold text-gradient">
           Dashboard
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-1">
           Overview of your production line
         </p>
       </motion.div>
 
-      <>
-        {/* KPI Cards */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-          variants={cardVariants}
-        >
-          <Card className="bg-linear-to-br from-violet-50 to-purple-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Clients</p>
-                  <p className="text-3xl font-bold text-violet-600">
-                    {totalClients}
-                  </p>
-                </div>
-                <div className="p-3 bg-violet-100 rounded-full">
-                  <Users className="w-6 h-6 text-violet-600" />
-                </div>
+      {/* KPI Cards */}
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        variants={cardVariants}
+      >
+        {/* Total Clients Card */}
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Total Clients</p>
+                <p className="text-3xl font-bold text-primary mt-1">
+                  {totalClients}
+                </p>
               </div>
-              <div className="mt-2 flex items-center text-sm text-green-600">
-                <ArrowUpRight className="w-4 h-4 mr-1" />{" "}
-                {metrics?.clientsGrowth || 0}% from last month
+              <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6 text-primary" />
               </div>
+            </div>
+            <div className="mt-3 flex items-center text-sm text-success">
+              <ArrowUpRight className="w-4 h-4 mr-1" />{" "}
+              <span className="font-medium">{metrics?.clientsGrowth || 0}%</span>
+              <span className="text-muted-foreground ml-1">from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Total Orders Card */}
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Total Orders</p>
+                <p className="text-3xl font-bold text-info mt-1">
+                  {totalOrders}
+                </p>
+              </div>
+              <div className="p-3 bg-info/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Package className="w-6 h-6 text-info" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center text-sm text-success">
+              <ArrowUpRight className="w-4 h-4 mr-1" />
+              <span className="font-medium">{metrics?.ordersGrowth || 0}%</span>
+              <span className="text-muted-foreground ml-1">from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* In Progress Card */}
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">In Progress</p>
+                <p className="text-3xl font-bold text-warning mt-1">
+                  {inProgressOrders}
+                </p>
+              </div>
+              <div className="p-3 bg-warning/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Activity className="w-6 h-6 text-warning" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center text-sm text-destructive">
+              <ArrowDownRight className="w-4 h-4 mr-1" />
+              <span className="font-medium">{Math.abs(metrics?.inProgressChange || 0)}%</span>
+              <span className="text-muted-foreground ml-1">from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Completed Card */}
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Completed</p>
+                <p className="text-3xl font-bold text-success mt-1">
+                  {completedOrders}
+                </p>
+              </div>
+              <div className="p-3 bg-success/10 rounded-xl group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-6 h-6 text-success" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center text-sm text-success">
+              <ArrowUpRight className="w-4 h-4 mr-1" />
+              <span className="font-medium">{metrics?.completedGrowth || 0}%</span>
+              <span className="text-muted-foreground ml-1">from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Charts Section */}
+      <motion.div variants={cardVariants} className="space-y-6">
+        {/* Time Range Filter */}
+        <div className="flex justify-end">
+          <Select
+            value={timeRange}
+            onValueChange={(v) =>
+              setTimeRange(v as "day" | "week" | "month")
+            }
+          >
+            <SelectTrigger className="w-45 bg-card/50 border-border/50">
+              <SelectValue placeholder="Select time range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">Last 24 Hours</SelectItem>
+              <SelectItem value="week">Last 7 Days</SelectItem>
+              <SelectItem value="month">Last 30 Days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Orders Bar Chart */}
+          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Package className="w-5 h-5 text-primary" /> Orders Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={[
+                    { name: "Pending", value: pendingOrders },
+                    { name: "In Progress", value: inProgressOrders },
+                    { name: "Completed", value: completedOrders },
+                    { name: "Cancelled", value: cancelledOrders },
+                  ]}
+                  layout="vertical"
+                  margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+                >
+                  <defs>
+                    <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.warning.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.warning.light} stopOpacity={0.4}/>
+                    </linearGradient>
+                    <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.info.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.info.light} stopOpacity={0.4}/>
+                    </linearGradient>
+                    <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.success.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.success.light} stopOpacity={0.4}/>
+                    </linearGradient>
+                    <linearGradient id="colorCancelled" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.destructive.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.destructive.light} stopOpacity={0.4}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                  <XAxis type="number" stroke={chartColors.axis} fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke={chartColors.axis} fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: chartColors.tooltip.bg, 
+                      borderRadius: '12px',
+                      border: `1px solid ${chartColors.tooltip.border}`,
+                      boxShadow: chartColors.tooltip.shadow,
+                      color: chartColors.tooltip.text
+                    }}
+                    formatter={(value: number) => [`${value} Orders`, 'Count']}
+                  />
+                  <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={28}>
+                    {[
+                      { name: "Pending", fill: "url(#colorPending)" },
+                      { name: "In Progress", fill: "url(#colorInProgress)" },
+                      { name: "Completed", fill: "url(#colorCompleted)" },
+                      { name: "Cancelled", fill: "url(#colorCancelled)" },
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card className="bg-linear-to-br from-blue-50 to-cyan-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Orders</p>
-                  <p className="text-3xl font-bold text-blue-600">
-                    {totalOrders}
-                  </p>
-                </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Package className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-center text-sm text-green-600">
-                <ArrowUpRight className="w-4 h-4 mr-1" />{" "}
-                {metrics?.ordersGrowth || 0}% from last month
-              </div>
+          {/* Orders Trend */}
+          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="w-5 h-5 text-primary" /> Orders Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart
+                  data={trendData.length > 0 ? trendData : [
+                    { date: "Mon", orders: 10, completed: 5 },
+                    { date: "Tue", orders: 15, completed: 8 },
+                    { date: "Wed", orders: 12, completed: 10 },
+                    { date: "Thu", orders: 18, completed: 12 },
+                    { date: "Fri", orders: 14, completed: 9 },
+                    { date: "Sat", orders: 8, completed: 6 },
+                    { date: "Sun", orders: 5, completed: 3 },
+                  ]}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.info.main} stopOpacity={0.5}/>
+                      <stop offset="95%" stopColor={chartColors.info.main} stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorCompletedArea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.success.main} stopOpacity={0.5}/>
+                      <stop offset="95%" stopColor={chartColors.success.main} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke={chartColors.axis} 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke={chartColors.axis} 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: chartColors.tooltip.bg, 
+                      borderRadius: '12px',
+                      border: `1px solid ${chartColors.tooltip.border}`,
+                      boxShadow: chartColors.tooltip.shadow,
+                      color: chartColors.tooltip.text
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '20px' }}
+                    iconType="circle"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="orders"
+                    stroke={chartColors.info.main}
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorOrders)"
+                    name="Total Orders"
+                    animationDuration={1500}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="completed"
+                    stroke={chartColors.success.main}
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorCompletedArea)"
+                    name="Completed"
+                    animationDuration={1500}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
+        </div>
 
-          <Card className="bg-linear-to-br from-orange-50 to-amber-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
-                  <p className="text-3xl font-bold text-orange-600">
-                    {inProgressOrders}
-                  </p>
-                </div>
-                <div className="p-3 bg-orange-100 rounded-full">
-                  <Activity className="w-6 h-6 text-orange-600" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-center text-sm text-red-600">
-                <ArrowDownRight className="w-4 h-4 mr-1" />{" "}
-                {Math.abs(metrics?.inProgressChange || 0)}% from last month
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-linear-to-br from-green-50 to-emerald-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                  <p className="text-3xl font-bold text-green-600">
-                    {completedOrders}
-                  </p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-center text-sm text-green-600">
-                <ArrowUpRight className="w-4 h-4 mr-1" />{" "}
-                {metrics?.completedGrowth || 0}% from last month
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Charts Section */}
-        <motion.div variants={cardVariants} className="space-y-6">
-          {/* Time Range Filter */}
-          <div className="flex justify-end">
+        {/* Step Selection */}
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Clock className="w-5 h-5 text-primary" /> Average Time per Step
+              (minutes)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <Select
-              value={timeRange}
-              onValueChange={(v) =>
-                setTimeRange(v as "day" | "week" | "month")
-              }
+              value={String(selectedStep)}
+              onValueChange={(v) => setSelectedStep(parseInt(v))}
             >
-              <SelectTrigger className="w-45">
-                <SelectValue placeholder="Select time range" />
+              <SelectTrigger className="w-full max-w-xs bg-card/50 border-border/50">
+                <SelectValue placeholder="Select step" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="day">Last 24 Hours</SelectItem>
-                <SelectItem value="week">Last 7 Days</SelectItem>
-                <SelectItem value="month">Last 30 Days</SelectItem>
+                {stepNames.map((name, i) => (
+                  <SelectItem key={i} value={String(i + 1)}>
+                    {name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Orders Bar Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="w-5 h-5" /> Orders Overview
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart
-                        data={[
-                          {
-                            name: "Pending",
-                            value: pendingOrders,
-                          },
-                          {
-                            name: "In Progress",
-                            value: inProgressOrders,
-                          },
-                          {
-                            name: "Completed",
-                            value: completedOrders,
-                          },
-                          {
-                            name: "Cancelled",
-                            value: cancelledOrders,
-                          },
-                        ]}
-                        layout="vertical"
-                        margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
-                      >
-                        <defs>
-                          <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="colorCancelled" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.3}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                        <XAxis type="number" stroke={chartColors.axis} fontSize={12} />
-                        <YAxis dataKey="name" type="category" stroke={chartColors.axis} fontSize={12} />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: chartColors.tooltip.bg, 
-                            borderRadius: '8px',
-                            border: `1px solid ${chartColors.tooltip.border}`,
-                            boxShadow: chartColors.tooltip.shadow,
-                            color: chartColors.tooltip.text
-                          }}
-                          formatter={(value: number) => [`${value} Orders`, 'Count']}
-                        />
-                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                          {[
-                            { name: "Pending", fill: "url(#colorPending)" },
-                            { name: "In Progress", fill: "url(#colorInProgress)" },
-                            { name: "Completed", fill: "url(#colorCompleted)" },
-                            { name: "Cancelled", fill: "url(#colorCancelled)" },
-                          ].map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                {/* Orders Trend */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" /> Orders Trend
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart
-                        data={
-                          trendData.length > 0
-                            ? trendData
-                            : [
-                                { date: "Mon", orders: 10, completed: 5 },
-                                { date: "Tue", orders: 15, completed: 8 },
-                                { date: "Wed", orders: 12, completed: 10 },
-                                { date: "Thu", orders: 18, completed: 12 },
-                                { date: "Fri", orders: 14, completed: 9 },
-                                { date: "Sat", orders: 8, completed: 6 },
-                                { date: "Sun", orders: 5, completed: 3 },
-                              ]
-                        }
-                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-                      >
-                        <defs>
-                          <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorCompletedArea" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                        <XAxis 
-                          dataKey="date" 
-                          stroke={chartColors.axis} 
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis 
-                          stroke={chartColors.axis} 
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: chartColors.tooltip.bg, 
-                            borderRadius: '8px',
-                            border: `1px solid ${chartColors.tooltip.border}`,
-                            boxShadow: chartColors.tooltip.shadow,
-                            color: chartColors.tooltip.text
-                          }}
-                        />
-                        <Legend 
-                          wrapperStyle={{ paddingTop: '20px' }}
-                          iconType="circle"
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="orders"
-                          stroke="#3b82f6"
-                          strokeWidth={3}
-                          fillOpacity={1}
-                          fill="url(#colorOrders)"
-                          name="Total Orders"
-                          animationDuration={1500}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="completed"
-                          stroke="#22c55e"
-                          strokeWidth={3}
-                          fillOpacity={1}
-                          fill="url(#colorCompletedArea)"
-                          name="Completed"
-                          animationDuration={1500}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Step Selection */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" /> Average Time per Step
-                    (minutes)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Select
-                    value={String(selectedStep)}
-                    onValueChange={(v) => setSelectedStep(parseInt(v))}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {performanceData.map((step, i) => {
+                const gradients = [
+                  "from-primary to-primary/60",
+                  "from-info to-info/60",
+                  "from-warning to-warning/60",
+                  "from-success to-success/60",
+                  "from-pink-500 to-pink-400",
+                  "from-indigo-500 to-indigo-400",
+                ];
+                return (
+                  <motion.div
+                    key={step.step}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border border-border/30 hover:border-border/60 transition-colors"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select step" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {stepNames.map((name, i) => (
-                        <SelectItem key={i} value={String(i + 1)}>
-                          {name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-4 space-y-3">
-                    {performanceData.map((step, i) => (
+                    <div className="flex items-center gap-3">
                       <div
-                        key={step.step}
-                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-primary-foreground font-bold bg-gradient-to-br ${gradients[i % gradients.length]} shadow-lg`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                              i === 0
-                                ? "bg-linear-to-br from-violet-500 to-purple-500"
-                                : i === 1
-                                  ? "bg-linear-to-br from-blue-500 to-cyan-500"
-                                  : i === 2
-                                    ? "bg-linear-to-br from-orange-500 to-amber-500"
-                                    : i === 3
-                                      ? "bg-linear-to-br from-green-500 to-emerald-500"
-                                      : i === 4
-                                        ? "bg-linear-to-br from-pink-500 to-rose-500"
-                                        : "bg-linear-to-br from-indigo-500 to-blue-500"
-                            }`}
-                          >
-                            {step.stepOrder}
-                          </div>
-                          <span className="font-medium">{step.step}</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">{step.avgTime} min</p>
-                          <p className="text-xs text-muted-foreground">
-                            {step.minTime}-{step.maxTime} min
-                          </p>
-                        </div>
+                        {step.stepOrder}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Step Progress Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="w-5 h-5" /> Step Progression -{" "}
-                      {timeRange === "day"
-                        ? "24 Hours"
-                        : timeRange === "week"
-                          ? "7 Days"
-                          : "30 Days"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart
-                        data={
-                          stepAnalytics && stepAnalytics.length > 0
-                            ? stepAnalytics
-                            : [
-                                { date: "Day 1", orders: 5, completed: 3 },
-                                { date: "Day 2", orders: 8, completed: 5 },
-                                { date: "Day 3", orders: 6, completed: 4 },
-                                { date: "Day 4", orders: 10, completed: 7 },
-                                { date: "Day 5", orders: 7, completed: 5 },
-                                { date: "Day 6", orders: 4, completed: 3 },
-                                { date: "Day 7", orders: 3, completed: 2 },
-                              ]
-                        }
-                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-                      >
-                        <defs>
-                          <linearGradient id="gradientOrdersLine" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#f59e0b" />
-                            <stop offset="100%" stopColor="#f97316" />
-                          </linearGradient>
-                          <linearGradient id="gradientCompletedLine" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#22c55e" />
-                            <stop offset="100%" stopColor="#10b981" />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                        <XAxis 
-                          dataKey="date" 
-                          stroke={chartColors.axis} 
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis 
-                          stroke={chartColors.axis} 
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: chartColors.tooltip.bg, 
-                            borderRadius: '8px',
-                            border: `1px solid ${chartColors.tooltip.border}`,
-                            boxShadow: chartColors.tooltip.shadow,
-                            color: chartColors.tooltip.text
-                          }}
-                        />
-                        <Legend 
-                          wrapperStyle={{ paddingTop: '20px' }}
-                          iconType="circle"
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="orders"
-                          stroke="url(#gradientOrdersLine)"
-                          strokeWidth={4}
-                          dot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
-                          activeDot={{ r: 8, fill: '#f59e0b', stroke: '#fff', strokeWidth: 3 }}
-                          name="Entered"
-                          animationDuration={1500}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="completed"
-                          stroke="url(#gradientCompletedLine)"
-                          strokeWidth={4}
-                          dot={{ r: 6, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }}
-                          activeDot={{ r: 8, fill: '#22c55e', stroke: '#fff', strokeWidth: 3 }}
-                          name="Completed"
-                          animationDuration={1500}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-              {/* Step Performance */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" /> Step Performance
-                    Comparison
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart
-                      data={performanceData}
-                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                    >
-                      <defs>
-                        <linearGradient id="colorAvgTime" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.9}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.4}/>
-                        </linearGradient>
-                        <linearGradient id="colorMinTime" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9}/>
-                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0.4}/>
-                        </linearGradient>
-                        <linearGradient id="colorMaxTime" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                      <XAxis 
-                        dataKey="step" 
-                        stroke={chartColors.axis} 
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis 
-                        stroke={chartColors.axis} 
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: chartColors.axis, fontSize: 12 }}
-                      />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: chartColors.tooltip.bg, 
-                          borderRadius: '8px',
-                          border: `1px solid ${chartColors.tooltip.border}`,
-                          boxShadow: chartColors.tooltip.shadow,
-                          color: chartColors.tooltip.text
-                        }}
-                        formatter={(value: number, name: string) => [`${value} min`, name]}
-                      />
-                      <Legend 
-                        wrapperStyle={{ paddingTop: '20px' }}
-                        iconType="circle"
-                      />
-                      <Bar
-                        dataKey="avgTime"
-                        name="Avg Time"
-                        fill="url(#colorAvgTime)"
-                        radius={[4, 4, 0, 0]}
-                        animationDuration={1500}
-                      />
-                      <Bar
-                        dataKey="minTime"
-                        name="Min Time"
-                        fill="url(#colorMinTime)"
-                        radius={[4, 4, 0, 0]}
-                        animationDuration={1500}
-                      />
-                      <Bar
-                        dataKey="maxTime"
-                        name="Max Time"
-                        fill="url(#colorMaxTime)"
-                        radius={[4, 4, 0, 0]}
-                        animationDuration={1500}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                      <span className="font-medium">{step.step}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg">{step.avgTime} min</p>
+                      <p className="text-xs text-muted-foreground">
+                        {step.minTime}-{step.maxTime} min
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-          </motion.div>
-        </>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Step Progress Chart */}
+          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Activity className="w-5 h-5 text-primary" /> Step Progression -{" "}
+                {timeRange === "day"
+                  ? "24 Hours"
+                  : timeRange === "week"
+                    ? "7 Days"
+                    : "30 Days"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart
+                  data={stepAnalytics && stepAnalytics.length > 0 ? stepAnalytics : [
+                    { date: "Day 1", orders: 5, completed: 3 },
+                    { date: "Day 2", orders: 8, completed: 5 },
+                    { date: "Day 3", orders: 6, completed: 4 },
+                    { date: "Day 4", orders: 10, completed: 7 },
+                    { date: "Day 5", orders: 7, completed: 5 },
+                    { date: "Day 6", orders: 4, completed: 3 },
+                    { date: "Day 7", orders: 3, completed: 2 },
+                  ]}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="gradientOrdersLine" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={chartColors.warning.main} />
+                      <stop offset="100%" stopColor={chartColors.warning.light} />
+                    </linearGradient>
+                    <linearGradient id="gradientCompletedLine" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={chartColors.success.main} />
+                      <stop offset="100%" stopColor={chartColors.success.light} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke={chartColors.axis} 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke={chartColors.axis} 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: chartColors.tooltip.bg, 
+                      borderRadius: '12px',
+                      border: `1px solid ${chartColors.tooltip.border}`,
+                      boxShadow: chartColors.tooltip.shadow,
+                      color: chartColors.tooltip.text
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '20px' }}
+                    iconType="circle"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="url(#gradientOrdersLine)"
+                    strokeWidth={3}
+                    dot={{ r: 5, fill: chartColors.warning.main, stroke: '#fff', strokeWidth: 2 }}
+                    activeDot={{ r: 7, fill: chartColors.warning.main, stroke: '#fff', strokeWidth: 3 }}
+                    name="Entered"
+                    animationDuration={1500}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    stroke="url(#gradientCompletedLine)"
+                    strokeWidth={3}
+                    dot={{ r: 5, fill: chartColors.success.main, stroke: '#fff', strokeWidth: 2 }}
+                    activeDot={{ r: 7, fill: chartColors.success.main, stroke: '#fff', strokeWidth: 3 }}
+                    name="Completed"
+                    animationDuration={1500}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Step Performance */}
+          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="w-5 h-5 text-primary" /> Step Performance
+                Comparison
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={performanceData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                >
+                  <defs>
+                    <linearGradient id="colorAvgTime" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.warning.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.warning.light} stopOpacity={0.5}/>
+                    </linearGradient>
+                    <linearGradient id="colorMinTime" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.success.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.success.light} stopOpacity={0.5}/>
+                    </linearGradient>
+                    <linearGradient id="colorMaxTime" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.info.main} stopOpacity={0.9}/>
+                      <stop offset="95%" stopColor={chartColors.info.light} stopOpacity={0.5}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                  <XAxis 
+                    dataKey="step" 
+                    stroke={chartColors.axis} 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke={chartColors.axis} 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: chartColors.axis, fontSize: 12 }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: chartColors.tooltip.bg, 
+                      borderRadius: '12px',
+                      border: `1px solid ${chartColors.tooltip.border}`,
+                      boxShadow: chartColors.tooltip.shadow,
+                      color: chartColors.tooltip.text
+                    }}
+                    formatter={(value: number, name: string) => [`${value} min`, name]}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '20px' }}
+                    iconType="circle"
+                  />
+                  <Bar
+                    dataKey="avgTime"
+                    name="Avg Time"
+                    fill="url(#colorAvgTime)"
+                    radius={[6, 6, 0, 0]}
+                    animationDuration={1500}
+                  />
+                  <Bar
+                    dataKey="minTime"
+                    name="Min Time"
+                    fill="url(#colorMinTime)"
+                    radius={[6, 6, 0, 0]}
+                    animationDuration={1500}
+                  />
+                  <Bar
+                    dataKey="maxTime"
+                    name="Max Time"
+                    fill="url(#colorMaxTime)"
+                    radius={[6, 6, 0, 0]}
+                    animationDuration={1500}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
       </motion.div>
+    </motion.div>
   );
 };
 

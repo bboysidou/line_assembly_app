@@ -59,19 +59,6 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, scale: 1 },
 };
 
-const statusColors: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-  in_progress: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-  completed: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-  cancelled: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-};
-const borderColors: Record<string, string> = {
-  pending: "border-l-4 border-l-amber-500",
-  in_progress: "border-l-4 border-l-blue-500",
-  completed: "border-l-4 border-l-green-500",
-  cancelled: "border-l-4 border-l-red-500",
-};
-
 const OrdersPage = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -158,27 +145,35 @@ const OrdersPage = () => {
   const completedCount =
     orders?.filter((o) => o.status === "completed").length || 0;
 
-  if (isLoading) return <Loader2 className="animate-spin" />;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <motion.div
-      className="p-6 space-y-6"
+      className="p-6 space-y-6 max-w-[1600px] mx-auto"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
+      {/* Header */}
       <motion.div
         className="flex justify-between items-center"
         variants={cardVariants}
       >
         <div>
           <motion.h1
-            className="text-3xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"
+            className="text-3xl font-bold text-gradient"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
             Orders
           </motion.h1>
-          <p className="text-muted-foreground">Manage production orders</p>
+          <p className="text-muted-foreground mt-1">Manage production orders</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -187,14 +182,14 @@ const OrdersPage = () => {
                 form.reset();
                 setEditingOrder(null);
               }}
-              className="bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+              className="btn-primary glow-primary"
             >
               <Plus className="w-4 h-4 mr-2" /> New Order
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-xl">
                 {editingOrder ? "Edit Order" : "New Order"}
               </DialogTitle>
             </DialogHeader>
@@ -210,7 +205,7 @@ const OrdersPage = () => {
                     <FormItem>
                       <FormLabel>Order Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter order number" {...field} />
+                        <Input placeholder="Enter order number" className="input-focus" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -223,7 +218,7 @@ const OrdersPage = () => {
                     <FormItem>
                       <FormLabel>Product Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter product name" {...field} />
+                        <Input placeholder="Enter product name" className="input-focus" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -240,6 +235,7 @@ const OrdersPage = () => {
                           type="number"
                           min="1"
                           placeholder="Enter quantity"
+                          className="input-focus"
                           {...field}
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 1)
@@ -261,7 +257,7 @@ const OrdersPage = () => {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background/50 border-border/50">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
@@ -280,7 +276,7 @@ const OrdersPage = () => {
                 />
                 <Button
                   type="submit"
-                  className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                  className="w-full btn-primary"
                   disabled={
                     createMutation.isPending || updateMutation.isPending
                   }
@@ -295,123 +291,156 @@ const OrdersPage = () => {
           </DialogContent>
         </Dialog>
       </motion.div>
+
+      {/* Stats Cards */}
       <motion.div
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
         variants={cardVariants}
       >
-        <Card className="bg-linear-to-br from-amber-50 to-orange-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100 rounded-lg">
-                <Package className="w-5 h-5 text-amber-600" />
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-warning/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Package className="w-6 h-6 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-amber-600">
-                  {pendingCount}
-                </p>
+                <p className="text-sm text-muted-foreground font-medium">Pending</p>
+                <p className="text-3xl font-bold text-warning">{pendingCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-linear-to-br from-blue-50 to-cyan-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Package className="w-5 h-5 text-blue-600" />
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-info/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Package className="w-6 h-6 text-info" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {processingCount}
-                </p>
+                <p className="text-sm text-muted-foreground font-medium">In Progress</p>
+                <p className="text-3xl font-bold text-info">{processingCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-linear-to-br from-green-50 to-emerald-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Package className="w-5 h-5 text-green-600" />
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-success/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Package className="w-6 h-6 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {completedCount}
-                </p>
+                <p className="text-sm text-muted-foreground font-medium">Completed</p>
+                <p className="text-3xl font-bold text-success">{completedCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
+      {/* Orders Grid */}
       <motion.div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         variants={containerVariants}
       >
         <AnimatePresence>
-          {orders?.map((order, i) => (
-            <motion.div
-              key={order.id_order}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Card
-                className={`hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${borderColors[order.status]}`}
+          {orders?.map((order, i) => {
+            const statusConfig = {
+              pending: { 
+                bg: "bg-warning/10", 
+                text: "text-warning", 
+                border: "border-l-warning",
+                gradient: "from-warning/20 to-warning/5"
+              },
+              in_progress: { 
+                bg: "bg-info/10", 
+                text: "text-info", 
+                border: "border-l-info",
+                gradient: "from-info/20 to-info/5"
+              },
+              completed: { 
+                bg: "bg-success/10", 
+                text: "text-success", 
+                border: "border-l-success",
+                gradient: "from-success/20 to-success/5"
+              },
+              cancelled: { 
+                bg: "bg-destructive/10", 
+                text: "text-destructive", 
+                border: "border-l-destructive",
+                gradient: "from-destructive/20 to-destructive/5"
+              },
+            };
+            const config = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending;
+            
+            return (
+              <motion.div
+                key={order.id_order}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: i * 0.05 }}
               >
-                <CardContent className="pt-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                        <Package className="w-5 h-5 text-white" />
+                <Card
+                  className={`card-hover border-border/50 bg-card/50 backdrop-blur-sm border-l-4 ${config.border} overflow-hidden group`}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                  <CardContent className="pt-4 relative">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+                          <Package className="w-6 h-6 text-primary-foreground" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{order.product_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            #{order.order_number}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">{order.product_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          #{order.order_number}
-                        </p>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
+                      >
+                        {order.status.replace("_", " ")}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(order.created_at || "").toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Hash className="w-4 h-4" />
+                        {order.quantity} units
                       </div>
                     </div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status]}`}
-                    >
-                      {order.status.replace("_", " ")}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(order.created_at || "").toLocaleDateString()}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                        onClick={() => handleEdit(order)}
+                      >
+                        <Pencil className="w-4 h-4 mr-1" /> Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleDelete(order.id_order)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Hash className="w-4 h-4" />
-                      {order.quantity} units
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(order)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(order.id_order)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </motion.div>
     </motion.div>

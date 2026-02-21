@@ -30,6 +30,9 @@ import {
   Mail,
   Phone,
   MapPin,
+  Users,
+  Calendar,
+  UserCheck,
 } from "lucide-react";
 import {
   onGetAllClientsAction,
@@ -133,15 +136,17 @@ const ClientsPage = () => {
   const handleDelete = (id: string) => {
     if (confirm("Delete this client?")) deleteMutation.mutate(id);
   };
+  
   const getGradient = (name: string) =>
     [
-      "from-violet-500 to-purple-500",
-      "from-blue-500 to-cyan-500",
-      "from-green-500 to-emerald-500",
-      "from-orange-500 to-amber-500",
-      "from-pink-500 to-rose-500",
-      "from-indigo-500 to-blue-500",
+      "from-primary to-primary/70",
+      "from-info to-info/70",
+      "from-success to-success/70",
+      "from-warning to-warning/70",
+      "from-pink-500 to-pink-400",
+      "from-indigo-500 to-indigo-400",
     ][name.charCodeAt(0) % 6];
+  
   const getInitials = (name: string) =>
     name
       .split(" ")
@@ -150,28 +155,35 @@ const ClientsPage = () => {
       .toUpperCase()
       .slice(0, 2);
 
-  if (isLoading) return <Loader2 className="animate-spin" />;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
-      className="p-6 space-y-6"
+      className="p-6 space-y-6 max-w-[1600px] mx-auto"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
+      {/* Header */}
       <motion.div
         className="flex justify-between items-center"
         variants={cardVariants}
       >
         <div>
           <motion.h1
-            className="text-3xl font-bold bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent"
+            className="text-3xl font-bold text-gradient"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
             Clients
           </motion.h1>
-          <p className="text-muted-foreground">Manage your clients</p>
+          <p className="text-muted-foreground mt-1">Manage your clients</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -180,14 +192,14 @@ const ClientsPage = () => {
                 form.reset();
                 setEditingClient(null);
               }}
-              className="bg-linear-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+              className="btn-primary glow-primary"
             >
               <Plus className="w-4 h-4 mr-2" /> Add Client
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-xl">
                 {editingClient ? "Edit Client" : "New Client"}
               </DialogTitle>
             </DialogHeader>
@@ -203,7 +215,7 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter client name" {...field} />
+                        <Input placeholder="Enter client name" className="input-focus" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -219,6 +231,7 @@ const ClientsPage = () => {
                         <Input
                           type="email"
                           placeholder="Enter email"
+                          className="input-focus"
                           {...field}
                         />
                       </FormControl>
@@ -233,7 +246,7 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter phone number" {...field} />
+                        <Input placeholder="Enter phone number" className="input-focus" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -246,7 +259,7 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter address" {...field} />
+                        <Input placeholder="Enter address" className="input-focus" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -254,7 +267,7 @@ const ClientsPage = () => {
                 />
                 <Button
                   type="submit"
-                  className="w-full bg-linear-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  className="w-full btn-primary"
                   disabled={
                     createMutation.isPending || updateMutation.isPending
                   }
@@ -270,36 +283,56 @@ const ClientsPage = () => {
         </Dialog>
       </motion.div>
 
+      {/* Stats Cards */}
       <motion.div
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
         variants={cardVariants}
       >
-        <Card className="bg-linear-to-br from-violet-50 to-purple-50">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-3xl font-bold text-violet-600">
-              {clients?.length || 0}
-            </p>
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Total</p>
+                <p className="text-3xl font-bold text-primary">{clients?.length || 0}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-linear-to-br from-blue-50 to-cyan-50">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">This Month</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {clients?.length || 0}
-            </p>
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-info/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Calendar className="w-6 h-6 text-info" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">This Month</p>
+                <p className="text-3xl font-bold text-info">{clients?.length || 0}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-linear-to-br from-green-50 to-emerald-50">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Active</p>
-            <p className="text-3xl font-bold text-green-600">
-              {clients?.length || 0}
-            </p>
+        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-success/10 rounded-xl group-hover:scale-110 transition-transform">
+                <UserCheck className="w-6 h-6 text-success" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Active</p>
+                <p className="text-3xl font-bold text-success">{clients?.length || 0}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
 
+      {/* Clients Grid */}
       <motion.div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         variants={containerVariants}
@@ -314,46 +347,50 @@ const ClientsPage = () => {
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-3 mb-3">
+              <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <CardContent className="pt-6 relative">
+                  <div className="flex items-center gap-4 mb-4">
                     <div
-                      className={`w-12 h-12 rounded-full bg-linear-to-br ${getGradient(client.client_name)} flex items-center justify-center shadow-lg`}
+                      className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getGradient(client.client_name)} flex items-center justify-center shadow-lg`}
                     >
-                      <span className="text-white font-bold">
+                      <span className="text-primary-foreground font-bold text-lg">
                         {getInitials(client.client_name)}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold">{client.client_name}</p>
+                      <p className="font-semibold text-lg text-foreground">{client.client_name}</p>
+                      <p className="text-xs text-muted-foreground">Client</p>
                     </div>
                   </div>
-                  <div className="space-y-1 text-sm text-muted-foreground">
+                  <div className="space-y-2 text-sm text-muted-foreground mb-4">
                     <p className="flex items-center gap-2">
-                      <Mail className="w-4 h-4" /> {client.client_email}
+                      <Mail className="w-4 h-4 text-primary/60" /> {client.client_email}
                     </p>
                     <p className="flex items-center gap-2">
-                      <Phone className="w-4 h-4" /> {client.client_phone || "-"}
+                      <Phone className="w-4 h-4 text-primary/60" /> {client.client_phone || "-"}
                     </p>
                     <p className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />{" "}
+                      <MapPin className="w-4 h-4 text-primary/60" />{" "}
                       {client.client_address || "-"}
                     </p>
                   </div>
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="flex-1 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                       onClick={() => handleEdit(client)}
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-4 h-4 mr-1" /> Edit
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
+                      className="flex-1"
                       onClick={() => handleDelete(client.id_client)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 mr-1" /> Delete
                     </Button>
                   </div>
                 </CardContent>
