@@ -1,0 +1,64 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis_line_assembly
+    ports:
+      - "6380:${REDIS_PORT}"
+    expose:
+      - ${REDIS_PORT}
+    volumes:
+      - ./redisData:/data
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    networks:
+      line_assembly_dev_network:
+        aliases:
+          - redis_line_assembly.local
+  db:
+    image: postgres:15-alpine
+    container_name: db_line_assembly
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./pgData:/var/lib/postgresql/data
+    depends_on:
+      - redis
+    ports:
+      - "5433:${DB_PORT}"
+    expose:
+      - ${DB_PORT}
+    networks:
+      line_assembly_dev_network:
+        aliases:
+          - db_line_assembly.local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: backend_line_assembly
+    restart: always
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+    expose:
+      - ${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    networks:
+      line_assembly_dev_network:
+        aliases:
+          - backend_line_assembly.local
+
+networks:
+  line_assembly_dev_network:
+    name: line_assembly_dev_network
+    driver: bridge

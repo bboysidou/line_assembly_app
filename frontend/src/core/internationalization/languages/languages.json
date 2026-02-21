@@ -1,0 +1,14 @@
+{
+  "fr": {
+    "CHANGE_LANGUAGE": "Changer la langue",
+    "LANGUAGE": "Langue",
+    "FR": "Français",
+    "AR": "Arabe"
+  },
+  "ar": {
+    "CHANGE_LANGUAGE": "تغيير اللغة",
+    "LANGUAGE": "اللغة",
+    "FR": "الفرنسية",
+    "AR": "العربية"
+  }
+}

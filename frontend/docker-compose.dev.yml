@@ -1,0 +1,22 @@
+services:
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    container_name: frontend_line_assembly
+    restart: always
+    volumes:
+      - ./:/app
+    expose:
+      - ${VITE_PORT}
+    ports:
+      - "${VITE_PORT}:${VITE_PORT}"
+    networks:
+      line_assembly_dev_network:
+        aliases:
+          - frontend_line_assembly.local
+
+networks:
+  line_assembly_dev_network:
+    name: line_assembly_dev_network
+    driver: bridge
