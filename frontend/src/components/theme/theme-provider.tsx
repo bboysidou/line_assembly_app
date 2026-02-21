@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useEffect, useState, useCallback, type ReactNode } from "react";
 
 export type Theme = "dark" | "light" | "system";
 
@@ -10,11 +10,13 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme;
+  effectiveTheme: "dark" | "light";
   setTheme: (theme: Theme) => void;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>({
   theme: "system",
+  effectiveTheme: "light",
   setTheme: () => null,
 });
 
@@ -23,32 +25,56 @@ export const ThemeProvider = ({
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
 }: ThemeProviderProps) => {
-  const [theme, setTheme] = useState<Theme>(
+  const [theme, setThemeState] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
+
+  const [effectiveTheme, setEffectiveTheme] = useState<"dark" | "light">(() => {
+    const stored = localStorage.getItem(storageKey) as Theme;
+    if (stored === "system" || !stored) {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return stored;
+  });
+
+  const updateEffectiveTheme = useCallback((newTheme: Theme) => {
+    let effective: "dark" | "light";
+    if (newTheme === "system") {
+      effective = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    } else {
+      effective = newTheme;
+    }
+    setEffectiveTheme(effective);
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
+    root.classList.add(effectiveTheme);
+  }, [effectiveTheme]);
 
+  useEffect(() => {
+    updateEffectiveTheme(theme);
+    
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handler = (e: MediaQueryListEvent) => {
+        setEffectiveTheme(e.matches ? "dark" : "light");
+      };
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
     }
-  }, [theme]);
+  }, [theme, updateEffectiveTheme]);
 
   return (
     <ThemeProviderContext.Provider
       value={{
         theme,
+        effectiveTheme,
         setTheme: (theme: Theme) => {
           localStorage.setItem(storageKey, theme);
-          setTheme(theme);
+          setThemeState(theme);
+          updateEffectiveTheme(theme);
         },
       }}
     >

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTheme } from "@/components/theme/use-theme";
+
 import {
   Select,
   SelectContent,
@@ -38,6 +39,8 @@ import {
   Line,
   AreaChart,
   Area,
+  Cell,
+  Legend,
 } from "recharts";
 
 const containerVariants = {
@@ -59,6 +62,21 @@ const stepNames = [
 ];
 
 const DashboardPage = () => {
+  const { effectiveTheme } = useTheme();
+  const isDark = effectiveTheme === "dark";
+  
+  // Chart colors that adapt to dark mode
+  const chartColors = {
+    grid: isDark ? "#374151" : "#e2e8f0",
+    axis: isDark ? "#9ca3af" : "#64748b",
+    tooltip: {
+      bg: isDark ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
+      border: isDark ? "#4b5563" : "#e2e8f0",
+      shadow: isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+      text: isDark ? "#f9fafb" : "#1f2937",
+    },
+  };
+
   const [timeRange, setTimeRange] = useState<"day" | "week" | "month">("week");
   const [selectedStep, setSelectedStep] = useState<number>(1);
 
@@ -233,31 +251,26 @@ const DashboardPage = () => {
         </motion.div>
 
         {/* Charts Section */}
-        <motion.div variants={cardVariants}>
-          <Tabs defaultValue="orders" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <TabsList>
-                <TabsTrigger value="orders">Orders Overview</TabsTrigger>
-                <TabsTrigger value="assembly">Assembly Metrics</TabsTrigger>
-              </TabsList>
-              <Select
-                value={timeRange}
-                onValueChange={(v) =>
-                  setTimeRange(v as "day" | "week" | "month")
-                }
-              >
-                <SelectTrigger className="w-45">
-                  <SelectValue placeholder="Select time range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">Last 24 Hours</SelectItem>
-                  <SelectItem value="week">Last 7 Days</SelectItem>
-                  <SelectItem value="month">Last 30 Days</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <motion.div variants={cardVariants} className="space-y-6">
+          {/* Time Range Filter */}
+          <div className="flex justify-end">
+            <Select
+              value={timeRange}
+              onValueChange={(v) =>
+                setTimeRange(v as "day" | "week" | "month")
+              }
+            >
+              <SelectTrigger className="w-45">
+                <SelectValue placeholder="Select time range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="day">Last 24 Hours</SelectItem>
+                <SelectItem value="week">Last 7 Days</SelectItem>
+                <SelectItem value="month">Last 30 Days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <TabsContent value="orders" className="space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Orders Bar Chart */}
                 <Card>
@@ -273,30 +286,64 @@ const DashboardPage = () => {
                           {
                             name: "Pending",
                             value: pendingOrders,
-                            fill: "#f59e0b",
                           },
                           {
                             name: "In Progress",
                             value: inProgressOrders,
-                            fill: "#3b82f6",
                           },
                           {
                             name: "Completed",
                             value: completedOrders,
-                            fill: "#22c55e",
                           },
                           {
                             name: "Cancelled",
                             value: cancelledOrders,
-                            fill: "#ef4444",
                           },
                         ]}
+                        layout="vertical"
+                        margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                        <defs>
+                          <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                          </linearGradient>
+                          <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          </linearGradient>
+                          <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0.3}/>
+                          </linearGradient>
+                          <linearGradient id="colorCancelled" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                        <XAxis type="number" stroke={chartColors.axis} fontSize={12} />
+                        <YAxis dataKey="name" type="category" stroke={chartColors.axis} fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: chartColors.tooltip.bg, 
+                            borderRadius: '8px',
+                            border: `1px solid ${chartColors.tooltip.border}`,
+                            boxShadow: chartColors.tooltip.shadow,
+                            color: chartColors.tooltip.text
+                          }}
+                          formatter={(value: number) => [`${value} Orders`, 'Count']}
+                        />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+                          {[
+                            { name: "Pending", fill: "url(#colorPending)" },
+                            { name: "In Progress", fill: "url(#colorInProgress)" },
+                            { name: "Completed", fill: "url(#colorCompleted)" },
+                            { name: "Cancelled", fill: "url(#colorCancelled)" },
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -325,96 +372,134 @@ const DashboardPage = () => {
                                 { date: "Sun", orders: 5, completed: 3 },
                               ]
                         }
+                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorCompletedArea" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke={chartColors.axis} 
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis 
+                          stroke={chartColors.axis} 
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: chartColors.tooltip.bg, 
+                            borderRadius: '8px',
+                            border: `1px solid ${chartColors.tooltip.border}`,
+                            boxShadow: chartColors.tooltip.shadow,
+                            color: chartColors.tooltip.text
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          iconType="circle"
+                        />
                         <Area
                           type="monotone"
                           dataKey="orders"
                           stroke="#3b82f6"
-                          fill="#3b82f6"
-                          fillOpacity={0.3}
+                          strokeWidth={3}
+                          fillOpacity={1}
+                          fill="url(#colorOrders)"
+                          name="Total Orders"
+                          animationDuration={1500}
                         />
                         <Area
                           type="monotone"
                           dataKey="completed"
                           stroke="#22c55e"
-                          fill="#22c55e"
-                          fillOpacity={0.3}
+                          strokeWidth={3}
+                          fillOpacity={1}
+                          fill="url(#colorCompletedArea)"
+                          name="Completed"
+                          animationDuration={1500}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
 
-            <TabsContent value="assembly" className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Step Selection */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="w-5 h-5" /> Average Time per Step
-                      (minutes)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Select
-                      value={String(selectedStep)}
-                      onValueChange={(v) => setSelectedStep(parseInt(v))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select step" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {stepNames.map((name, i) => (
-                          <SelectItem key={i} value={String(i + 1)}>
-                            {name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <div className="mt-4 space-y-3">
-                      {performanceData.map((step, i) => (
-                        <div
-                          key={step.step}
-                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                                i === 0
-                                  ? "bg-linear-to-br from-violet-500 to-purple-500"
-                                  : i === 1
-                                    ? "bg-linear-to-br from-blue-500 to-cyan-500"
-                                    : i === 2
-                                      ? "bg-linear-to-br from-orange-500 to-amber-500"
-                                      : i === 3
-                                        ? "bg-linear-to-br from-green-500 to-emerald-500"
-                                        : i === 4
-                                          ? "bg-linear-to-br from-pink-500 to-rose-500"
-                                          : "bg-linear-to-br from-indigo-500 to-blue-500"
-                              }`}
-                            >
-                              {step.stepOrder}
-                            </div>
-                            <span className="font-medium">{step.step}</span>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold">{step.avgTime} min</p>
-                            <p className="text-xs text-muted-foreground">
-                              {step.minTime}-{step.maxTime} min
-                            </p>
-                          </div>
-                        </div>
+              {/* Step Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" /> Average Time per Step
+                    (minutes)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select
+                    value={String(selectedStep)}
+                    onValueChange={(v) => setSelectedStep(parseInt(v))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select step" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stepNames.map((name, i) => (
+                        <SelectItem key={i} value={String(i + 1)}>
+                          {name}
+                        </SelectItem>
                       ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                    </SelectContent>
+                  </Select>
+                  <div className="mt-4 space-y-3">
+                    {performanceData.map((step, i) => (
+                      <div
+                        key={step.step}
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                              i === 0
+                                ? "bg-linear-to-br from-violet-500 to-purple-500"
+                                : i === 1
+                                  ? "bg-linear-to-br from-blue-500 to-cyan-500"
+                                  : i === 2
+                                    ? "bg-linear-to-br from-orange-500 to-amber-500"
+                                    : i === 3
+                                      ? "bg-linear-to-br from-green-500 to-emerald-500"
+                                      : i === 4
+                                        ? "bg-linear-to-br from-pink-500 to-rose-500"
+                                        : "bg-linear-to-br from-indigo-500 to-blue-500"
+                            }`}
+                          >
+                            {step.stepOrder}
+                          </div>
+                          <span className="font-medium">{step.step}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{step.avgTime} min</p>
+                          <p className="text-xs text-muted-foreground">
+                            {step.minTime}-{step.maxTime} min
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Step Progress Chart */}
                 <Card>
                   <CardHeader>
@@ -443,30 +528,69 @@ const DashboardPage = () => {
                                 { date: "Day 7", orders: 3, completed: 2 },
                               ]
                         }
+                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="gradientOrdersLine" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#f59e0b" />
+                            <stop offset="100%" stopColor="#f97316" />
+                          </linearGradient>
+                          <linearGradient id="gradientCompletedLine" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#22c55e" />
+                            <stop offset="100%" stopColor="#10b981" />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke={chartColors.axis} 
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis 
+                          stroke={chartColors.axis} 
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: chartColors.tooltip.bg, 
+                            borderRadius: '8px',
+                            border: `1px solid ${chartColors.tooltip.border}`,
+                            boxShadow: chartColors.tooltip.shadow,
+                            color: chartColors.tooltip.text
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          iconType="circle"
+                        />
                         <Line
                           type="monotone"
                           dataKey="orders"
-                          stroke="#f59e0b"
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
+                          stroke="url(#gradientOrdersLine)"
+                          strokeWidth={4}
+                          dot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
+                          activeDot={{ r: 8, fill: '#f59e0b', stroke: '#fff', strokeWidth: 3 }}
+                          name="Entered"
+                          animationDuration={1500}
                         />
                         <Line
                           type="monotone"
                           dataKey="completed"
-                          stroke="#22c55e"
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
+                          stroke="url(#gradientCompletedLine)"
+                          strokeWidth={4}
+                          dot={{ r: 6, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }}
+                          activeDot={{ r: 8, fill: '#22c55e', stroke: '#fff', strokeWidth: 3 }}
+                          name="Completed"
+                          animationDuration={1500}
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
-              </div>
 
               {/* Step Performance */}
               <Card>
@@ -478,38 +602,82 @@ const DashboardPage = () => {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="step" />
-                      <YAxis />
-                      <Tooltip />
+                    <BarChart
+                      data={performanceData}
+                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorAvgTime" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.9}/>
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                        </linearGradient>
+                        <linearGradient id="colorMinTime" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9}/>
+                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0.4}/>
+                        </linearGradient>
+                        <linearGradient id="colorMaxTime" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                      <XAxis 
+                        dataKey="step" 
+                        stroke={chartColors.axis} 
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        stroke={chartColors.axis} 
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: chartColors.axis, fontSize: 12 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: chartColors.tooltip.bg, 
+                          borderRadius: '8px',
+                          border: `1px solid ${chartColors.tooltip.border}`,
+                          boxShadow: chartColors.tooltip.shadow,
+                          color: chartColors.tooltip.text
+                        }}
+                        formatter={(value: number, name: string) => [`${value} min`, name]}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '20px' }}
+                        iconType="circle"
+                      />
                       <Bar
                         dataKey="avgTime"
-                        name="Avg Time (min)"
-                        fill="#f59e0b"
+                        name="Avg Time"
+                        fill="url(#colorAvgTime)"
                         radius={[4, 4, 0, 0]}
+                        animationDuration={1500}
                       />
                       <Bar
                         dataKey="minTime"
                         name="Min Time"
-                        fill="#22c55e"
+                        fill="url(#colorMinTime)"
                         radius={[4, 4, 0, 0]}
+                        animationDuration={1500}
                       />
                       <Bar
                         dataKey="maxTime"
                         name="Max Time"
-                        fill="#3b82f6"
+                        fill="url(#colorMaxTime)"
                         radius={[4, 4, 0, 0]}
+                        animationDuration={1500}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </>
-    </motion.div>
+            </div>
+          </motion.div>
+        </>
+      </motion.div>
   );
 };
 

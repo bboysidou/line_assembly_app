@@ -3,12 +3,12 @@ import { Switch } from "../ui/switch";
 import { useTheme } from "./use-theme";
 
 const DarkModeToggle = () => {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, effectiveTheme } = useTheme();
 
   return (
     <Switch
-      icon={theme === "dark" ? Moon : Sun}
-      checked={theme === "dark"}
+      icon={effectiveTheme === "dark" ? Moon : Sun}
+      checked={effectiveTheme === "dark"}
       onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
     />
   );
