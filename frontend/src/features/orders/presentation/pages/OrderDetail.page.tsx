@@ -103,22 +103,22 @@ const ItemLogCard = ({
   };
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-3 border-l-4 border-l-primary/30 hover:border-l-primary/60 hover:shadow-md transition-all duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
               <Package className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">{item.product_name} <span className="text-muted-foreground">#{item.unit_number}</span></CardTitle>
+              <CardTitle className="text-lg">{item.product_name} <span className="text-muted-foreground font-normal">#{item.unit_number}</span></CardTitle>
               <p className="text-sm text-muted-foreground">Unit {item.unit_number} of {item.quantity}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Badge
               variant="outline"
-              className={`${item.current_step_status === "completed" ? "bg-success/10 text-success" : item.current_step_status === "in_progress" ? "bg-info/10 text-info" : "bg-muted text-muted-foreground"}`}
+              className={`${item.current_step_status === "completed" ? "bg-success/10 text-success border-success/30" : item.current_step_status === "in_progress" ? "bg-info/10 text-info border-info/30" : "bg-muted/50 text-muted-foreground border-muted-foreground/30"}`}
             >
               {statusText}
             </Badge>
@@ -126,6 +126,7 @@ const ItemLogCard = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
+              className="hover:bg-primary/10"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
@@ -644,18 +645,48 @@ const OrderDetailPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Item Cards */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Items</h3>
-                {itemsWithProgress.map((item: OrderItemWithProgressEntity) => (
-                  <ItemLogCard
-                    key={item.id_order_item}
-                    item={item}
-                    steps={steps}
-                    onCompleteStep={handleCompleteStep}
-                    isCompleting={completeStepMutation.isPending}
-                  />
-                ))}
+              {/* Item Cards - Grouped by Product */}
+              <div className="space-y-6">
+                {(() => {
+                  // Group items by product name
+                  const groupedItems = itemsWithProgress.reduce((acc: Record<string, OrderItemWithProgressEntity[]>, item: OrderItemWithProgressEntity) => {
+                    const productName = item.product_name;
+                    if (!acc[productName]) {
+                      acc[productName] = [];
+                    }
+                    acc[productName].push(item);
+                    return acc;
+                  }, {} as Record<string, OrderItemWithProgressEntity[]>);
+
+                  return Object.entries(groupedItems).map(([productName, items]) => (
+                    <div key={productName} className="space-y-3">
+                      {/* Product Header */}
+                      <div className="flex items-center gap-3 px-1">
+                        <div className="p-1.5 bg-primary/10 rounded-lg">
+                          <Package className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-semibold">{productName}</h3>
+                          <p className="text-xs text-muted-foreground">{items.length} unit{items.length > 1 ? 's' : ''}</p>
+                        </div>
+                        <div className="flex-1 h-px bg-border/50 ml-3" />
+                      </div>
+                      
+                      {/* Items for this product */}
+                      <div className="grid gap-3 pl-2 border-l-2 border-primary/10">
+                        {items.map((item: OrderItemWithProgressEntity) => (
+                          <ItemLogCard
+                            key={item.id_order_item}
+                            item={item}
+                            steps={steps}
+                            onCompleteStep={handleCompleteStep}
+                            isCompleting={completeStepMutation.isPending}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             </>
           ) : (
