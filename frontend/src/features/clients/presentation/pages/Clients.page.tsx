@@ -1,27 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   Table,
   TableBody,
@@ -54,66 +38,21 @@ import {
 } from "lucide-react";
 import {
   onGetAllClientsAction,
-  onCreateClientAction,
-  onUpdateClientAction,
   onDeleteClientAction,
 } from "../actions/clients.action";
-import {
-  createClientSchema,
-  updateClientSchema,
-  type CreateClientSchemaType,
-  type UpdateClientSchemaType,
-} from "../schemas/clients.schema";
+import { PathManager } from "@/core/routes/path_manager.route";
 
 const ClientsPage = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState<UpdateClientSchemaType | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"client_name" | "client_email" | "created_at">("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-  const form = useForm<CreateClientSchemaType>({
-    resolver: zodResolver(createClientSchema),
-    defaultValues: {
-      client_name: "",
-      client_email: "",
-      client_phone: "",
-      client_address: "",
-    },
-  });
 
   const { data: clients, isLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: onGetAllClientsAction,
     refetchOnMount: true,
-  });
-
-  const createMutation = useMutation({
-    mutationFn: onCreateClientAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setIsDialogOpen(false);
-      form.reset();
-      toast.success("Client created successfully");
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to create client", { description: error.message });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: onUpdateClientAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setIsDialogOpen(false);
-      setEditingClient(null);
-      form.reset();
-      toast.success("Client updated successfully");
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to update client", { description: error.message });
-    },
   });
 
   const deleteMutation = useMutation({
@@ -127,30 +66,8 @@ const ClientsPage = () => {
     },
   });
 
-  const onSubmit = (data: CreateClientSchemaType) => {
-    // Convert empty strings to null for nullable fields
-    const processedData = {
-      ...data,
-      client_phone: data.client_phone || null,
-      client_address: data.client_address || null,
-    };
-    
-    if (editingClient) {
-      updateMutation.mutate({ ...editingClient, ...processedData });
-    } else {
-      createMutation.mutate(processedData);
-    }
-  };
-
-  const handleEdit = (client: UpdateClientSchemaType) => {
-    setEditingClient(client);
-    form.reset({
-      client_name: client.client_name,
-      client_email: client.client_email,
-      client_phone: client.client_phone || "",
-      client_address: client.client_address || "",
-    });
-    setIsDialogOpen(true);
+  const handleEdit = (clientId: string) => {
+    navigate(`${PathManager.CLIENTS_EDIT_PAGE}?id=${clientId}`);
   };
 
   const handleDelete = (id: string) => {
@@ -211,100 +128,12 @@ const ClientsPage = () => {
           </h1>
           <p className="text-muted-foreground mt-1">Manage your client database</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) {
-            setEditingClient(null);
-            form.reset({
-              client_name: "",
-              client_email: "",
-              client_phone: "",
-              client_address: "",
-            });
-          }
-        }}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setEditingClient(null);
-                form.reset({
-                  client_name: "",
-                  client_email: "",
-                  client_phone: "",
-                  client_address: "",
-                });
-              }}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
-            >
-              <Plus className="w-4 h-4 mr-2" /> Add Client
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50">
-            <DialogHeader>
-              <DialogTitle className="text-xl">{editingClient ? "Edit Client" : "New Client"}</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="client_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter client name" className="bg-background/50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="client_email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="Enter email" className="bg-background/50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="client_phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter phone number" className="bg-background/50" {...field} value={field.value ?? ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="client_address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter address" className="bg-background/50" {...field} value={field.value ?? ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                  {editingClient ? "Update" : "Add"} Client
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        <Button
+          onClick={() => navigate(PathManager.CLIENTS_CREATE_PAGE)}
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+        >
+          <Plus className="w-4 h-4 mr-2" /> Add Client
+        </Button>
       </motion.div>
 
       {/* Stats Cards */}
@@ -399,89 +228,109 @@ const ClientsPage = () => {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/20 hover:bg-muted/20 border-b border-border/50">
-                    <TableHead className="w-12 text-center font-semibold">#</TableHead>
+                  <TableRow className="hover:bg-transparent">
                     <TableHead
-                      className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
+                      className="cursor-pointer hover:text-primary transition-colors"
                       onClick={() => handleSort("client_name")}
                     >
-                      <div className="flex items-center">Client <SortIcon field="client_name" /></div>
+                      <div className="flex items-center">
+                        Client <SortIcon field="client_name" />
+                      </div>
                     </TableHead>
                     <TableHead
-                      className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
+                      className="cursor-pointer hover:text-primary transition-colors"
                       onClick={() => handleSort("client_email")}
                     >
-                      <div className="flex items-center">Email <SortIcon field="client_email" /></div>
+                      <div className="flex items-center">
+                        Contact <SortIcon field="client_email" />
+                      </div>
                     </TableHead>
-                    <TableHead className="font-semibold">Phone</TableHead>
-                    <TableHead className="font-semibold">Address</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Address</TableHead>
                     <TableHead
-                      className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
+                      className="cursor-pointer hover:text-primary transition-colors"
                       onClick={() => handleSort("created_at")}
                     >
-                      <div className="flex items-center">Created <SortIcon field="created_at" /></div>
+                      <div className="flex items-center">
+                        Created <SortIcon field="created_at" />
+                      </div>
                     </TableHead>
-                    <TableHead className="w-16 text-center font-semibold">Actions</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredClients.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-16">
-                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                          <Users className="w-12 h-12 opacity-20" />
-                          <p>{searchQuery ? "No clients found matching your search" : "No clients yet"}</p>
+                      <TableCell colSpan={6} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2">
+                          <Users className="w-12 h-12 text-muted-foreground/50" />
+                          <p className="text-muted-foreground">No clients found</p>
+                          {searchQuery && (
+                            <p className="text-sm text-muted-foreground">Try adjusting your search query</p>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredClients.map((client, i) => (
+                    filteredClients.map((client) => (
                       <TableRow
                         key={client.id_client}
-                        className="group hover:bg-muted/30 transition-colors border-b border-border/30"
+                        className="group hover:bg-muted/30 transition-colors"
                       >
-                        <TableCell className="text-center text-muted-foreground font-medium">{i + 1}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getGradient(client.client_name)} flex items-center justify-center shadow-md`}>
-                              <span className="text-white font-bold text-sm">{getInitials(client.client_name)}</span>
+                            <div
+                              className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getGradient(client.client_name)} flex items-center justify-center text-white text-sm font-bold shadow-md group-hover:shadow-lg transition-shadow`}
+                            >
+                              {getInitials(client.client_name)}
                             </div>
-                            <span className="font-medium">{client.client_name}</span>
+                            <div>
+                              <p className="font-medium">{client.client_name}</p>
+                              <p className="text-xs text-muted-foreground">{client.client_email}</p>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Mail className="w-4 h-4 opacity-50" />
-                            {client.client_email}
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{client.client_email}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Phone className="w-4 h-4 opacity-50" />
-                            {client.client_phone || "-"}
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{client.client_phone || "N/A"}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-muted-foreground max-w-[200px]">
-                            <MapPin className="w-4 h-4 opacity-50 flex-shrink-0" />
-                            <span className="truncate">{client.client_address || "-"}</span>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm truncate max-w-[200px]">{client.client_address || "N/A"}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {client.created_at ? new Date(client.created_at).toLocaleDateString() : "-"}
+                        <TableCell>
+                          <span className="text-sm text-muted-foreground">
+                            {client.created_at ? new Date(client.created_at).toLocaleDateString() : "N/A"}
+                          </span>
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-50 hover:opacity-100 hover:bg-primary/10 transition-all">
-                                <MoreHorizontal className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-card/95 backdrop-blur-xl border-border/50">
-                              <DropdownMenuItem onClick={() => handleEdit(client)} className="cursor-pointer">
+                            <DropdownMenuContent align="end" className="bg-card/95 backdrop-blur-xl">
+                              <DropdownMenuItem
+                                onClick={() => handleEdit(client.id_client)}
+                                className="cursor-pointer"
+                              >
                                 <Pencil className="w-4 h-4 mr-2" /> Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDelete(client.id_client)} className="cursor-pointer text-destructive focus:text-destructive">
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(client.id_client)}
+                                className="cursor-pointer text-destructive focus:text-destructive"
+                              >
                                 <Trash2 className="w-4 h-4 mr-2" /> Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>

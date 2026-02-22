@@ -6,6 +6,8 @@ export const PathManager = {
   // PROTECTED PAGES
   DASHBOARD_PAGE: "/",
   CLIENTS_PAGE: "/clients",
+  CLIENTS_CREATE_PAGE: "/clients/new",
+  CLIENTS_EDIT_PAGE: "/clients/edit",
   ORDERS_PAGE: "/orders",
   ORDERS_CREATE_PAGE: "/orders/new",
   ORDERS_EDIT_PAGE: "/orders/edit",
