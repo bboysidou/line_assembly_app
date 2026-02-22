@@ -346,7 +346,9 @@ const DashboardPage = () => {
                       boxShadow: chartColors.tooltip.shadow,
                       color: chartColors.tooltip.text
                     }}
-                    formatter={(value: number) => [`${value} Orders`, 'Count']}
+                    labelStyle={{ color: chartColors.tooltip.text }}
+                    itemStyle={{ color: chartColors.tooltip.text }}
+                    formatter={(value: number, name: string) => [`${value} Orders`, name]}
                     cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={48}>
