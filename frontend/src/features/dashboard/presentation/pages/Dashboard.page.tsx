@@ -322,30 +322,22 @@ const DashboardPage = () => {
                     { name: "Completed", value: completedOrders },
                     { name: "Cancelled", value: cancelledOrders },
                   ]}
-                  layout="vertical"
-                  margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
-                  <defs>
-                    <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.warning.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.warning.light} stopOpacity={0.4}/>
-                    </linearGradient>
-                    <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.info.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.info.light} stopOpacity={0.4}/>
-                    </linearGradient>
-                    <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.success.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.success.light} stopOpacity={0.4}/>
-                    </linearGradient>
-                    <linearGradient id="colorCancelled" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.destructive.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.destructive.light} stopOpacity={0.4}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                  <XAxis type="number" stroke={chartColors.axis} fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke={chartColors.axis} fontSize={12} tickLine={false} axisLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke={chartColors.axis} 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false} 
+                  />
+                  <YAxis 
+                    stroke={chartColors.axis} 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false} 
+                  />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: chartColors.tooltip.bg, 
@@ -355,16 +347,13 @@ const DashboardPage = () => {
                       color: chartColors.tooltip.text
                     }}
                     formatter={(value: number) => [`${value} Orders`, 'Count']}
+                    cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
                   />
-                  <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={28}>
-                    {[
-                      { name: "Pending", fill: "url(#colorPending)" },
-                      { name: "In Progress", fill: "url(#colorInProgress)" },
-                      { name: "Completed", fill: "url(#colorCompleted)" },
-                      { name: "Cancelled", fill: "url(#colorCancelled)" },
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={48}>
+                    <Cell fill={chartColors.warning.main} />
+                    <Cell fill={chartColors.info.main} />
+                    <Cell fill={chartColors.success.main} />
+                    <Cell fill={chartColors.destructive.main} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -621,20 +610,6 @@ const DashboardPage = () => {
                   data={performanceData}
                   margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
-                  <defs>
-                    <linearGradient id="colorAvgTime" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.warning.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.warning.light} stopOpacity={0.5}/>
-                    </linearGradient>
-                    <linearGradient id="colorMinTime" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.success.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.success.light} stopOpacity={0.5}/>
-                    </linearGradient>
-                    <linearGradient id="colorMaxTime" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.info.main} stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor={chartColors.info.light} stopOpacity={0.5}/>
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
                   <XAxis 
                     dataKey="step" 
@@ -659,6 +634,7 @@ const DashboardPage = () => {
                       color: chartColors.tooltip.text
                     }}
                     formatter={(value: number, name: string) => [`${value} min`, name]}
+                    cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '20px' }}
@@ -667,21 +643,21 @@ const DashboardPage = () => {
                   <Bar
                     dataKey="avgTime"
                     name="Avg Time"
-                    fill="url(#colorAvgTime)"
+                    fill={chartColors.warning.main}
                     radius={[6, 6, 0, 0]}
                     animationDuration={1500}
                   />
                   <Bar
                     dataKey="minTime"
                     name="Min Time"
-                    fill="url(#colorMinTime)"
+                    fill={chartColors.success.main}
                     radius={[6, 6, 0, 0]}
                     animationDuration={1500}
                   />
                   <Bar
                     dataKey="maxTime"
                     name="Max Time"
-                    fill="url(#colorMaxTime)"
+                    fill={chartColors.info.main}
                     radius={[6, 6, 0, 0]}
                     animationDuration={1500}
                   />
