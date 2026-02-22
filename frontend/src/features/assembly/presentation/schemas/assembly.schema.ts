@@ -6,9 +6,9 @@ export const startStepSchema = z.object({
     .number({ message: "Step ID is required" })
     .min(1, "Step must be between 1 and 6")
     .max(6, "Step must be between 1 and 6"),
-  scanned_by: z.string().optional(),
-  barcode: z.string().optional(),
-  notes: z.string().optional(),
+  scanned_by: z.string().nullable().optional(),
+  barcode: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
 });
 
 export const completeStepSchema = z.object({

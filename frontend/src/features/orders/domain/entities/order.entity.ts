@@ -1,12 +1,12 @@
 // order.entity.ts
 export class OrderEntity {
   public readonly id_order: string;
-  public readonly id_client?: string;
+  public readonly id_client?: string | null;
   public readonly order_number: string;
   public readonly product_name: string;
   public readonly quantity: number;
   public readonly status: string;
-  public readonly notes?: string;
+  public readonly notes?: string | null;
   public readonly created_at?: Date;
   public readonly updated_at?: Date;
 

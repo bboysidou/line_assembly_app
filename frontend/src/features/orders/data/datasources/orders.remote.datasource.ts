@@ -1,4 +1,4 @@
-import { httpPublic } from "@/core/http/http";
+import { httpPublic, httpPrivate } from "@/core/http/http";
 import type {
   CreateOrderEntity,
   UpdateOrderEntity,
@@ -33,8 +33,8 @@ export class OrdersRemoteDataSource {
   // POST create order
   async onCreateOrder(order: CreateOrderEntity): Promise<OrderEntity> {
     try {
-      return await httpPublic.post<CreateOrderEntity, OrderEntity>(
-        `${BASE_URL}/create-order`,
+      return await httpPrivate.post<CreateOrderEntity, OrderEntity>(
+        `${BASE_URL}/`,
         order,
       );
     } catch (error) {
@@ -47,7 +47,7 @@ export class OrdersRemoteDataSource {
   // PATCH update order
   async onUpdateOrder(order: UpdateOrderEntity): Promise<OrderEntity> {
     try {
-      return await httpPublic.patch<UpdateOrderEntity, OrderEntity>(
+      return await httpPrivate.patch<UpdateOrderEntity, OrderEntity>(
         `${BASE_URL}/${order.id_order}`,
         order,
       );
@@ -59,12 +59,9 @@ export class OrdersRemoteDataSource {
   }
 
   // DELETE order
-  async onDeleteOrder(id_order: string): Promise<OrderEntity> {
+  async onDeleteOrder(id_order: string): Promise<void> {
     try {
-      return await httpPublic.delete<{ id_order: string }, OrderEntity>(
-        `${BASE_URL}/${id_order}`,
-        { id_order },
-      );
+      await httpPrivate.delete<void, void>(`${BASE_URL}/${id_order}`, undefined);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

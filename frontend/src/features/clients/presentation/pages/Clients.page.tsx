@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -23,16 +23,34 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Plus,
   Pencil,
   Trash2,
   Loader2,
-  Mail,
-  Phone,
-  MapPin,
+  Search,
+  MoreHorizontal,
   Users,
   Calendar,
   UserCheck,
+  ArrowUp,
+  ArrowDown,
+  Mail,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import {
   onGetAllClientsAction,
@@ -47,25 +65,16 @@ import {
   type UpdateClientSchemaType,
 } from "../schemas/clients.schema";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1 },
-};
-
 const ClientsPage = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingClient, setEditingClient] =
-    useState<UpdateClientSchemaType | null>(null);
+  const [editingClient, setEditingClient] = useState<UpdateClientSchemaType | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<"client_name" | "client_email" | "created_at">("created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const form = useForm<CreateClientSchemaType>({
-    resolver: zodResolver(
-      editingClient ? updateClientSchema : createClientSchema,
-    ),
+    resolver: zodResolver(createClientSchema),
     defaultValues: {
       client_name: "",
       client_email: "",
@@ -79,6 +88,7 @@ const ClientsPage = () => {
     queryFn: onGetAllClientsAction,
     refetchOnMount: true,
   });
+
   const createMutation = useMutation({
     mutationFn: onCreateClientAction,
     onSuccess: () => {
@@ -91,6 +101,7 @@ const ClientsPage = () => {
       toast.error("Failed to create client", { description: error.message });
     },
   });
+
   const updateMutation = useMutation({
     mutationFn: onUpdateClientAction,
     onSuccess: () => {
@@ -104,6 +115,7 @@ const ClientsPage = () => {
       toast.error("Failed to update client", { description: error.message });
     },
   });
+
   const deleteMutation = useMutation({
     mutationFn: onDeleteClientAction,
     onSuccess: () => {
@@ -116,10 +128,17 @@ const ClientsPage = () => {
   });
 
   const onSubmit = (data: CreateClientSchemaType) => {
+    // Convert empty strings to null for nullable fields
+    const processedData = {
+      ...data,
+      client_phone: data.client_phone || null,
+      client_address: data.client_address || null,
+    };
+    
     if (editingClient) {
-      updateMutation.mutate({ ...editingClient, ...data });
+      updateMutation.mutate({ ...editingClient, ...processedData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(processedData);
     }
   };
 
@@ -133,27 +152,42 @@ const ClientsPage = () => {
     });
     setIsDialogOpen(true);
   };
+
   const handleDelete = (id: string) => {
     if (confirm("Delete this client?")) deleteMutation.mutate(id);
   };
-  
+
+  const handleSort = (field: "client_name" | "client_email" | "created_at") => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const filteredClients = clients?.filter((client) =>
+    client.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.client_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (client.client_phone && client.client_phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (client.client_address && client.client_address.toLowerCase().includes(searchQuery.toLowerCase()))
+  ).sort((a, b) => {
+    const aVal = a[sortField] || "";
+    const bVal = b[sortField] || "";
+    const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+    return sortOrder === "asc" ? comparison : -comparison;
+  }) || [];
+
   const getGradient = (name: string) =>
-    [
-      "from-primary to-primary/70",
-      "from-info to-info/70",
-      "from-success to-success/70",
-      "from-warning to-warning/70",
-      "from-pink-500 to-pink-400",
-      "from-indigo-500 to-indigo-400",
-    ][name.charCodeAt(0) % 6];
-  
+    ["from-primary to-violet-500", "from-info to-cyan-500", "from-success to-emerald-500", "from-warning to-amber-500", "from-pink-500 to-rose-500", "from-indigo-500 to-purple-500"][name.charCodeAt(0) % 6];
+
   const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+
+  const SortIcon = ({ field }: { field: "client_name" | "client_email" | "created_at" }) => {
+    if (sortField !== field) return null;
+    return sortOrder === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
+  };
 
   if (isLoading) {
     return (
@@ -164,50 +198,53 @@ const ClientsPage = () => {
   }
 
   return (
-    <motion.div
-      className="p-6 space-y-6 max-w-[1600px] mx-auto"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <motion.div
-        className="flex justify-between items-center"
-        variants={cardVariants}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
         <div>
-          <motion.h1
-            className="text-3xl font-bold text-gradient"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
             Clients
-          </motion.h1>
-          <p className="text-muted-foreground mt-1">Manage your clients</p>
+          </h1>
+          <p className="text-muted-foreground mt-1">Manage your client database</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setEditingClient(null);
+            form.reset({
+              client_name: "",
+              client_email: "",
+              client_phone: "",
+              client_address: "",
+            });
+          }
+        }}>
           <DialogTrigger asChild>
             <Button
               onClick={() => {
-                form.reset();
                 setEditingClient(null);
+                form.reset({
+                  client_name: "",
+                  client_email: "",
+                  client_phone: "",
+                  client_address: "",
+                });
               }}
-              className="btn-primary glow-primary"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
             >
               <Plus className="w-4 h-4 mr-2" /> Add Client
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50">
             <DialogHeader>
-              <DialogTitle className="text-xl">
-                {editingClient ? "Edit Client" : "New Client"}
-              </DialogTitle>
+              <DialogTitle className="text-xl">{editingClient ? "Edit Client" : "New Client"}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="client_name"
@@ -215,7 +252,7 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter client name" className="input-focus" {...field} />
+                        <Input placeholder="Enter client name" className="bg-background/50" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -228,12 +265,7 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="Enter email"
-                          className="input-focus"
-                          {...field}
-                        />
+                        <Input type="email" placeholder="Enter email" className="bg-background/50" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -246,7 +278,7 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter phone number" className="input-focus" {...field} />
+                        <Input placeholder="Enter phone number" className="bg-background/50" {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -259,22 +291,14 @@ const ClientsPage = () => {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter address" className="input-focus" {...field} />
+                        <Input placeholder="Enter address" className="bg-background/50" {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  className="w-full btn-primary"
-                  disabled={
-                    createMutation.isPending || updateMutation.isPending
-                  }
-                >
-                  {createMutation.isPending || updateMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : null}
+                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80" disabled={createMutation.isPending || updateMutation.isPending}>
+                  {createMutation.isPending || updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                   {editingClient ? "Update" : "Add"} Client
                 </Button>
               </form>
@@ -286,120 +310,193 @@ const ClientsPage = () => {
       {/* Stats Cards */}
       <motion.div
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
-        variants={cardVariants}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
       >
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-primary/10 rounded-xl">
                 <Users className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Total</p>
-                <p className="text-3xl font-bold text-primary">{clients?.length || 0}</p>
+                <p className="text-sm text-muted-foreground">Total Clients</p>
+                <p className="text-3xl font-bold">{clients?.length || 0}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-lg hover:shadow-info/5 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-info/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-info/10 rounded-xl group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-info/10 rounded-xl">
                 <Calendar className="w-6 h-6 text-info" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">This Month</p>
-                <p className="text-3xl font-bold text-info">{clients?.length || 0}</p>
+                <p className="text-sm text-muted-foreground">This Month</p>
+                <p className="text-3xl font-bold">{clients?.length || 0}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-lg hover:shadow-success/5 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-success/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-success/10 rounded-xl group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-success/10 rounded-xl">
                 <UserCheck className="w-6 h-6 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Active</p>
-                <p className="text-3xl font-bold text-success">{clients?.length || 0}</p>
+                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-3xl font-bold">{clients?.length || 0}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Clients Grid */}
+      {/* Search */}
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-        variants={containerVariants}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
       >
-        <AnimatePresence>
-          {clients?.map((client, i) => (
-            <motion.div
-              key={client.id_client}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <CardContent className="pt-6 relative">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div
-                      className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getGradient(client.client_name)} flex items-center justify-center shadow-lg`}
-                    >
-                      <span className="text-primary-foreground font-bold text-lg">
-                        {getInitials(client.client_name)}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-lg text-foreground">{client.client_name}</p>
-                      <p className="text-xs text-muted-foreground">Client</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                    <p className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-primary/60" /> {client.client_email}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-primary/60" /> {client.client_phone || "-"}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary/60" />{" "}
-                      {client.client_address || "-"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                      onClick={() => handleEdit(client)}
-                    >
-                      <Pencil className="w-4 h-4 mr-1" /> Edit
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleDelete(client.id_client)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" /> Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        <Card className="border-border/50 bg-card/50">
+          <CardContent className="pt-4 pb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, phone, or address..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-background/50 border-border/50"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
-    </motion.div>
+
+      {/* Clients Table */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Card className="border-border/50 bg-card/50 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-muted/50 to-muted/30 border-b border-border/50 py-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Clients Directory
+              <span className="text-sm font-normal text-muted-foreground ml-auto">
+                {filteredClients.length} {filteredClients.length === 1 ? "client" : "clients"}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/20 hover:bg-muted/20 border-b border-border/50">
+                    <TableHead className="w-12 text-center font-semibold">#</TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
+                      onClick={() => handleSort("client_name")}
+                    >
+                      <div className="flex items-center">Client <SortIcon field="client_name" /></div>
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
+                      onClick={() => handleSort("client_email")}
+                    >
+                      <div className="flex items-center">Email <SortIcon field="client_email" /></div>
+                    </TableHead>
+                    <TableHead className="font-semibold">Phone</TableHead>
+                    <TableHead className="font-semibold">Address</TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
+                      onClick={() => handleSort("created_at")}
+                    >
+                      <div className="flex items-center">Created <SortIcon field="created_at" /></div>
+                    </TableHead>
+                    <TableHead className="w-16 text-center font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredClients.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-16">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <Users className="w-12 h-12 opacity-20" />
+                          <p>{searchQuery ? "No clients found matching your search" : "No clients yet"}</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredClients.map((client, i) => (
+                      <TableRow
+                        key={client.id_client}
+                        className="group hover:bg-muted/30 transition-colors border-b border-border/30"
+                      >
+                        <TableCell className="text-center text-muted-foreground font-medium">{i + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getGradient(client.client_name)} flex items-center justify-center shadow-md`}>
+                              <span className="text-white font-bold text-sm">{getInitials(client.client_name)}</span>
+                            </div>
+                            <span className="font-medium">{client.client_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Mail className="w-4 h-4 opacity-50" />
+                            {client.client_email}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Phone className="w-4 h-4 opacity-50" />
+                            {client.client_phone || "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-muted-foreground max-w-[200px]">
+                            <MapPin className="w-4 h-4 opacity-50 flex-shrink-0" />
+                            <span className="truncate">{client.client_address || "-"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {client.created_at ? new Date(client.created_at).toLocaleDateString() : "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-50 hover:opacity-100 hover:bg-primary/10 transition-all">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-card/95 backdrop-blur-xl border-border/50">
+                              <DropdownMenuItem onClick={() => handleEdit(client)} className="cursor-pointer">
+                                <Pencil className="w-4 h-4 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDelete(client.id_client)} className="cursor-pointer text-destructive focus:text-destructive">
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-import type { OrderEntity } from "../entities/order.entity";
 import type { OrdersDomainRepository } from "../repositories/orders.domain.repository";
 
 export class DeleteOrderUsecase {
@@ -8,7 +7,7 @@ export class DeleteOrderUsecase {
     this._repository = repository;
   }
 
-  async execute(id_order: string): Promise<OrderEntity> {
+  async execute(id_order: string): Promise<void> {
     return this._repository.deleteOrder(id_order);
   }
 }

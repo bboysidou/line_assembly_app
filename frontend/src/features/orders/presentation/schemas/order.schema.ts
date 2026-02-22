@@ -14,12 +14,12 @@ export const OrderStatusEnumList = Object.values(OrderStatusEnum);
 // Base schema with all fields
 export const orderSchema = z.object({
   id_order: z.string({ message: "ID is required" }),
-  id_client: z.string().optional(),
+  id_client: z.string().nullable().optional(),
   order_number: z.string().min(1, "Order number is required"),
   product_name: z.string().min(1, "Product name is required"),
   quantity: z.number().min(1, "Quantity must be at least 1"),
   status: z.enum(OrderStatusEnumList),
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
   created_at: z.date().optional(),
   updated_at: z.date().optional(),
 });

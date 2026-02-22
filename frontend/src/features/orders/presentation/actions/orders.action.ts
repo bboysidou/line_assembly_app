@@ -66,9 +66,9 @@ export const onUpdateOrderAction = async (
 
 export const onDeleteOrderAction = async (
   id_order: string,
-): Promise<OrderSchemaType> => {
+): Promise<void> => {
   try {
-    return await deleteOrderUsecase.execute(id_order) as unknown as OrderSchemaType;
+    await deleteOrderUsecase.execute(id_order);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";

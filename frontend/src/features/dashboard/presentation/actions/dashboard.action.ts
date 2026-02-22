@@ -1,44 +1,52 @@
 // dashboard.action.ts
-import { DashboardRemoteDataSource } from "../../data/datasources/dashboard.remote.datasource";
-import type { DashboardMetrics, OrderTrend, StepPerformance, StepAnalytics } from "../../data/datasources/dashboard.remote.datasource";
+import {
+  getDashboardMetricsUsecase,
+  getOrdersTrendUsecase,
+  getStepPerformanceUsecase,
+  getStepAnalyticsUsecase,
+} from "@/core/dependency_injections/dashboard.di";
+import type {
+  DashboardMetricsEntity,
+  OrderTrendEntity,
+  StepPerformanceEntity,
+  StepAnalyticsEntity,
+} from "../../domain/entities/dashboard.entity";
 import { QUERY_KEYS } from "@/core/http/type";
-
-const dashboardRemoteDataSource = new DashboardRemoteDataSource();
 
 // Query Keys - Export for use in components
 export const dashboardKeys = QUERY_KEYS.DASHBOARD;
 
 // Query Actions
-export const onGetDashboardMetricsAction = async (): Promise<DashboardMetrics> => {
+export const onGetDashboardMetricsAction = async (): Promise<DashboardMetricsEntity> => {
   try {
-    return await dashboardRemoteDataSource.onGetDashboardMetrics();
+    return await getDashboardMetricsUsecase.execute();
   } catch (error) {
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
     throw new Error(message);
   }
 };
 
-export const onGetOrdersTrendAction = async (period: string): Promise<OrderTrend[]> => {
+export const onGetOrdersTrendAction = async (period: string): Promise<OrderTrendEntity[]> => {
   try {
-    return await dashboardRemoteDataSource.onGetOrdersTrend(period);
+    return await getOrdersTrendUsecase.execute(period);
   } catch (error) {
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
     throw new Error(message);
   }
 };
 
-export const onGetStepPerformanceAction = async (): Promise<StepPerformance[]> => {
+export const onGetStepPerformanceAction = async (): Promise<StepPerformanceEntity[]> => {
   try {
-    return await dashboardRemoteDataSource.onGetStepPerformance();
+    return await getStepPerformanceUsecase.execute();
   } catch (error) {
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
     throw new Error(message);
   }
 };
 
-export const onGetStepAnalyticsAction = async (idStep: number, startDate?: string, endDate?: string): Promise<StepAnalytics[]> => {
+export const onGetStepAnalyticsAction = async (idStep: number, startDate?: string, endDate?: string): Promise<StepAnalyticsEntity[]> => {
   try {
-    return await dashboardRemoteDataSource.onGetStepAnalytics(idStep, startDate, endDate);
+    return await getStepAnalyticsUsecase.execute(idStep, startDate, endDate);
   } catch (error) {
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
     throw new Error(message);

@@ -12,5 +12,5 @@ export interface OrdersDomainRepository {
   // Command Operations (Write)
   createOrder(order: CreateOrderEntity): Promise<OrderEntity>;
   updateOrder(order: UpdateOrderEntity): Promise<OrderEntity>;
-  deleteOrder(id_order: string): Promise<OrderEntity>;
+  deleteOrder(id_order: string): Promise<void>;
 }

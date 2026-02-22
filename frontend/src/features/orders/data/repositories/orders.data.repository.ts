@@ -53,9 +53,9 @@ export class OrdersDataRepository implements OrdersDomainRepository {
     }
   }
 
-  async deleteOrder(id_order: string): Promise<OrderEntity> {
+  async deleteOrder(id_order: string): Promise<void> {
     try {
-      return await this._remoteDataSource.onDeleteOrder(id_order);
+      await this._remoteDataSource.onDeleteOrder(id_order);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

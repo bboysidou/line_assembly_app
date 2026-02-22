@@ -3,11 +3,11 @@ export class OrderProgressEntity {
   public readonly id_progress: string;
   public readonly id_order: string;
   public readonly id_step: number;
-  public readonly started_at?: Date;
-  public readonly completed_at?: Date;
-  public readonly scanned_by?: string;
-  public readonly barcode?: string;
-  public readonly notes?: string;
+  public readonly started_at?: Date | null;
+  public readonly completed_at?: Date | null;
+  public readonly scanned_by?: string | null;
+  public readonly barcode?: string | null;
+  public readonly notes?: string | null;
   public readonly created_at?: Date;
 
   constructor(props: OrderProgressEntity) {
