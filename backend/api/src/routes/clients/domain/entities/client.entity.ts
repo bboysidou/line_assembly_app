@@ -3,8 +3,8 @@ export class ClientEntity {
   public readonly id_client: string;
   public readonly client_name: string;
   public readonly client_email: string;
-  public readonly client_phone?: string;
-  public readonly client_address?: string;
+  public readonly client_phone?: string | null;
+  public readonly client_address?: string | null;
   public readonly created_at: Date;
   public readonly updated_at: Date;
 

@@ -5,9 +5,9 @@ import { z } from "zod";
 export const startStepSchema = z.object({
   id_order: z.string({ message: "Order ID is required" }),
   id_step: z.number({ message: "Step ID is required" }).min(1).max(6),
-  scanned_by: z.string().optional(),
-  barcode: z.string().optional(),
-  notes: z.string().optional(),
+  scanned_by: z.string().nullable().optional(),
+  barcode: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
 });
 
 // Schema for completing a step

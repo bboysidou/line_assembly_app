@@ -6,8 +6,8 @@ export const clientSchema = z.object({
   id_client: z.string({ message: "ID is required" }),
   client_name: z.string({ message: "Client name is required" }),
   client_email: z.string({ message: "Client email is required" }).email("Invalid email format"),
-  client_phone: z.string().optional(),
-  client_address: z.string().optional(),
+  client_phone: z.string().nullable().optional(),
+  client_address: z.string().nullable().optional(),
   created_at: z.date().optional(),
   updated_at: z.date().optional(),
 });

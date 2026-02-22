@@ -3,7 +3,7 @@ export class StepTimeLogEntity {
   public readonly id_log: string;
   public readonly id_order: string;
   public readonly id_step: number;
-  public readonly duration_seconds?: number;
+  public readonly duration_seconds?: number | null;
   public readonly completed_at: Date;
 
   constructor(props: StepTimeLogEntity) {

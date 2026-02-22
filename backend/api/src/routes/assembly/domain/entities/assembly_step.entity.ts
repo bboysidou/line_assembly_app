@@ -3,7 +3,7 @@ export class AssemblyStepEntity {
   public readonly id_step: number;
   public readonly step_name: string;
   public readonly step_order: number;
-  public readonly step_description?: string;
+  public readonly step_description?: string | null;
   public readonly is_active: boolean;
 
   constructor(props: AssemblyStepEntity) {
