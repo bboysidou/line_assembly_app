@@ -4,6 +4,7 @@ import type {
   UpdateOrderEntity,
   OrderEntity,
 } from "../../domain/entities/order.entity";
+import type { OrderItemWithProgressEntity } from "@/features/order_items/domain/entities/order_item_with_progress.entity";
 
 const BASE_URL = "/orders";
 
@@ -62,6 +63,19 @@ export class OrdersRemoteDataSource {
   async onDeleteOrder(id_order: string): Promise<void> {
     try {
       await httpPrivate.delete<void, void>(`${BASE_URL}/${id_order}`, undefined);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      throw new Error(message);
+    }
+  }
+
+  // GET order items with progress
+  async onGetOrderItemsWithProgress(id_order: string): Promise<OrderItemWithProgressEntity[]> {
+    try {
+      return await httpPublic.get<OrderItemWithProgressEntity[]>(
+        `${BASE_URL}/${id_order}/items-with-progress`,
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

@@ -20,7 +20,7 @@ export const UpdateOrderRemoteDataSource = async (
   try {
     const result = await db_client.query(UPDATE_ORDER_QUERY, [
       order.id_client || null,
-      order.order_number,
+      order.order_number || null,
       order.product_name,
       order.quantity,
       order.status,

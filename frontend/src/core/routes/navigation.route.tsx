@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, ClipboardList, Factory } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList } from "lucide-react";
 import { PathManager } from "./path_manager.route";
 
 interface Navigation {
@@ -22,10 +22,5 @@ export const sidebarNavigation: Navigation[] = [
     path: PathManager.SIDEBAR_NAVIGATION_ORDERS,
     title: "Orders",
     icon: <ClipboardList />,
-  },
-  {
-    path: PathManager.SIDEBAR_NAVIGATION_ASSEMBLY,
-    title: "Assembly Line",
-    icon: <Factory />,
   },
 ];

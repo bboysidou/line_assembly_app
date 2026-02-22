@@ -2,7 +2,8 @@ import AuthPage from "@/features/auth/presentation/pages/Auth.page";
 import { PathManager } from "./path_manager.route";
 import ClientsPage from "@/features/clients/presentation/pages/Clients.page";
 import OrdersPage from "@/features/orders/presentation/pages/Orders.page";
-import AssemblyPage from "@/features/assembly/presentation/pages/Assembly.page";
+import CreateEditOrderPage from "@/features/orders/presentation/pages/CreateEditOrder.page";
+import OrderDetailPage from "@/features/orders/presentation/pages/OrderDetail.page";
 import DashboardPage from "@/features/dashboard/presentation/pages/Dashboard.page";
 
 interface Route {
@@ -31,7 +32,15 @@ export const protectedRoute: Route[] = [
     children: <OrdersPage />,
   },
   {
-    path: PathManager.ASSEMBLY_PAGE,
-    children: <AssemblyPage />,
+    path: PathManager.ORDERS_CREATE_PAGE,
+    children: <CreateEditOrderPage />,
+  },
+  {
+    path: PathManager.ORDERS_EDIT_PAGE,
+    children: <CreateEditOrderPage />,
+  },
+  {
+    path: PathManager.ORDER_DETAIL_PAGE,
+    children: <OrderDetailPage />,
   },
 ];

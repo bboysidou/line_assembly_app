@@ -1,15 +1,29 @@
 import { httpPublic } from "@/core/http/http";
 import type { AssemblyStepEntity } from "../../domain/entities/assembly_step.entity";
-import type { OrderProgressEntity } from "../../domain/entities/order_progress.entity";
+import type { ItemProgressEntity } from "../../domain/entities/item_progress.entity";
 
 const BASE_URL = "/assembly";
 
 interface StartStepParams {
+  id_order_item: string;
+  id_step: number;
+  unit_number: number;
+  scanned_by?: string;
+  barcode?: string;
+  notes?: string;
+}
+
+interface StartStepForAllItemsParams {
   id_order: string;
   id_step: number;
   scanned_by?: string;
   barcode?: string;
   notes?: string;
+}
+
+interface CompleteStepForAllItemsParams {
+  id_order: string;
+  id_step: number;
 }
 
 export class AssemblyRemoteDataSource {
@@ -24,11 +38,11 @@ export class AssemblyRemoteDataSource {
     }
   }
 
-  // GET order progress
-  async onGetOrderProgress(id_order: string): Promise<OrderProgressEntity[]> {
+  // GET item progress
+  async onGetItemProgress(id_order_item: string): Promise<ItemProgressEntity[]> {
     try {
-      return await httpPublic.get<OrderProgressEntity[]>(
-        `${BASE_URL}/progress/${id_order}`,
+      return await httpPublic.get<ItemProgressEntity[]>(
+        `${BASE_URL}/progress/item/${id_order_item}`,
       );
     } catch (error) {
       const message =
@@ -59,10 +73,10 @@ export class AssemblyRemoteDataSource {
     }
   }
 
-  // POST start step
-  async onStartStep(params: StartStepParams): Promise<OrderProgressEntity> {
+  // POST start step for single item
+  async onStartStep(params: StartStepParams): Promise<ItemProgressEntity> {
     try {
-      return await httpPublic.post<StartStepParams, OrderProgressEntity>(
+      return await httpPublic.post<StartStepParams, ItemProgressEntity>(
         `${BASE_URL}/start-step`,
         params,
       );
@@ -74,11 +88,39 @@ export class AssemblyRemoteDataSource {
   }
 
   // POST complete step
-  async onCompleteStep(id_progress: string): Promise<OrderProgressEntity> {
+  async onCompleteStep(id_progress: string): Promise<ItemProgressEntity> {
     try {
-      return await httpPublic.post<{ id_progress: string }, OrderProgressEntity>(
+      return await httpPublic.post<{ id_progress: string }, ItemProgressEntity>(
         `${BASE_URL}/complete-step`,
         { id_progress },
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      throw new Error(message);
+    }
+  }
+
+  // POST start step for all items in an order
+  async onStartStepForAllItems(params: StartStepForAllItemsParams): Promise<ItemProgressEntity[]> {
+    try {
+      return await httpPublic.post<StartStepForAllItemsParams, ItemProgressEntity[]>(
+        `${BASE_URL}/start-step-all`,
+        params,
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      throw new Error(message);
+    }
+  }
+
+  // POST complete step for all items in an order
+  async onCompleteStepForAllItems(params: CompleteStepForAllItemsParams): Promise<ItemProgressEntity[]> {
+    try {
+      return await httpPublic.post<CompleteStepForAllItemsParams, ItemProgressEntity[]>(
+        `${BASE_URL}/complete-step-all`,
+        params,
       );
     } catch (error) {
       const message =

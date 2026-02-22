@@ -8,6 +8,7 @@ import { UPLOAD_DIR } from "./core/helpers/constants";
 import { authRouter } from "./routes/auth/presentation/auth.route";
 import { clientsRouter } from "./routes/clients/presentation/clients.route";
 import { ordersRouter } from "./routes/orders/presentation/orders.route";
+import { orderItemsRouter } from "./routes/order_items/presentation/order_items.route";
 import { assemblyRouter } from "./routes/assembly/presentation/assembly.route";
 import { dashboardRouter } from "./routes/dashboard/presentation/dashboard.route";
 
@@ -60,6 +61,7 @@ app.use("/media", express.static(UPLOAD_DIR));
 app.use(`${BASE_URL}/auth`, authRouter);
 app.use(`${BASE_URL}/clients`, clientsRouter);
 app.use(`${BASE_URL}/orders`, ordersRouter);
+app.use(`${BASE_URL}/order-items`, orderItemsRouter);
 app.use(`${BASE_URL}/assembly`, assemblyRouter);
 app.use(`${BASE_URL}/dashboard`, dashboardRouter);
 

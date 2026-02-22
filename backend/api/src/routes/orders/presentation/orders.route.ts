@@ -9,6 +9,7 @@ const controller = new OrdersController();
 // Public routes (no authentication required)
 router.get("/", controller.onGetAllOrdersController);
 router.get("/:id_order", controller.onGetOrderByIdController);
+router.get("/:id_order/items-with-progress", controller.onGetOrderItemsWithProgressController);
 
 // Protected routes (require authentication)
 router.post("/", authMiddleware, controller.onCreateOrderController);

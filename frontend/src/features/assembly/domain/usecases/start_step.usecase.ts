@@ -1,4 +1,4 @@
-import type { OrderProgressEntity } from "../entities/order_progress.entity";
+import type { ItemProgressEntity } from "../entities/item_progress.entity";
 import type { AssemblyDomainRepository } from "../repositories/assembly.domain.repository";
 
 export class StartStepUsecase {
@@ -9,12 +9,13 @@ export class StartStepUsecase {
   }
 
   async execute(
-    id_order: string,
+    id_order_item: string,
     id_step: number,
+    unit_number: number,
     scanned_by?: string,
     barcode?: string,
     notes?: string,
-  ): Promise<OrderProgressEntity> {
-    return this._repository.startStep(id_order, id_step, scanned_by, barcode, notes);
+  ): Promise<ItemProgressEntity> {
+    return this._repository.startStep(id_order_item, id_step, unit_number, scanned_by, barcode, notes);
   }
 }

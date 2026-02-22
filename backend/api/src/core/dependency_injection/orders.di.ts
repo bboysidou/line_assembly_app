@@ -5,6 +5,7 @@ import { GetAllOrdersUsecase } from "@/routes/orders/domain/usecases/get_all_ord
 import { GetOrderByIdUsecase } from "@/routes/orders/domain/usecases/get_order_by_id.usecase";
 import { UpdateOrderUsecase } from "@/routes/orders/domain/usecases/update_order.usecase";
 import { DeleteOrderUsecase } from "@/routes/orders/domain/usecases/delete_order.usecase";
+import { GetOrderItemsWithProgressUsecase } from "@/routes/orders/domain/usecases/get_order_items_with_progress.usecase";
 
 // Create repository instance (singleton)
 const dataRepository = new OrdersDataRepository();
@@ -15,6 +16,7 @@ const getAllOrdersUsecase = new GetAllOrdersUsecase(dataRepository);
 const getOrderByIdUsecase = new GetOrderByIdUsecase(dataRepository);
 const updateOrderUsecase = new UpdateOrderUsecase(dataRepository);
 const deleteOrderUsecase = new DeleteOrderUsecase(dataRepository);
+const getOrderItemsWithProgressUsecase = new GetOrderItemsWithProgressUsecase();
 
 // Export use cases for controller injection
 export {
@@ -23,4 +25,5 @@ export {
   getOrderByIdUsecase,
   updateOrderUsecase,
   deleteOrderUsecase,
+  getOrderItemsWithProgressUsecase,
 };

@@ -7,7 +7,6 @@ import {
   MAX_WIDTH_MOBILE,
   useMediaQuery,
 } from "../context/hooks/useMediaQuery";
-import SidebarQuickAccessComponent from "./Sidebar.quickaccess.component";
 
 const SidebarComponent = () => {
   const { collapsed, toggleSidebar } = useSidebar();
@@ -69,7 +68,6 @@ const SidebarComponent = () => {
         </div>
 
         <nav className="h-[90dvh] lg:w-full flex flex-col items-center overflow-y-auto md:items-start">
-          <SidebarQuickAccessComponent />
           <ul className="w-full overflow-y-auto">
             <div className="mt-4">
               {sidebarNavigation.map((item) => (

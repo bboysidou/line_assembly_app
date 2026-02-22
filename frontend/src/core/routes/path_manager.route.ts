@@ -7,11 +7,12 @@ export const PathManager = {
   DASHBOARD_PAGE: "/",
   CLIENTS_PAGE: "/clients",
   ORDERS_PAGE: "/orders",
-  ASSEMBLY_PAGE: "/assembly",
+  ORDERS_CREATE_PAGE: "/orders/new",
+  ORDERS_EDIT_PAGE: "/orders/edit",
+  ORDER_DETAIL_PAGE: "/orders/:id",
 
   // LINKS
   SIDEBAR_NAVIGATION_DASHBOARD: "/",
   SIDEBAR_NAVIGATION_CLIENTS: "/clients",
   SIDEBAR_NAVIGATION_ORDERS: "/orders",
-  SIDEBAR_NAVIGATION_ASSEMBLY: "/assembly",
 };

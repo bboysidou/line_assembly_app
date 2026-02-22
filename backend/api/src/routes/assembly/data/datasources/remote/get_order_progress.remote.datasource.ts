@@ -1,22 +1,24 @@
-// get_order_progress.remote.datasource.ts
+// get_item_progress.remote.datasource.ts
 import { db_client } from "@/core/database/db.config";
 import {
   BadRequestError,
   InternalServerError,
 } from "@/core/errors/custom.error";
-import type { OrderProgressEntity } from "../../../domain/entities/order_progress.entity";
+import type { ItemProgressEntity } from "../../../domain/entities/order_progress.entity";
 
-const GET_ORDER_PROGRESS_QUERY = `
-SELECT * FROM order_progress
-WHERE id_order = $1
-ORDER BY id_step ASC
+const GET_ITEM_PROGRESS_QUERY = `
+SELECT ip.*, s.step_name, s.step_order
+FROM item_progress ip
+JOIN assembly_steps s ON ip.id_step = s.id_step
+WHERE ip.id_order_item = $1
+ORDER BY s.step_order ASC
 `;
 
-export const GetOrderProgressRemoteDataSource = async (
-  id_order: string,
-): Promise<OrderProgressEntity[]> => {
+export const GetItemProgressRemoteDataSource = async (
+  id_order_item: string,
+): Promise<(ItemProgressEntity & { step_name: string; step_order: number })[]> => {
   try {
-    const result = await db_client.query(GET_ORDER_PROGRESS_QUERY, [id_order]);
+    const result = await db_client.query(GET_ITEM_PROGRESS_QUERY, [id_order_item]);
     return result.rows;
   } catch (error) {
     console.log(error);
@@ -26,3 +28,6 @@ export const GetOrderProgressRemoteDataSource = async (
     throw new InternalServerError("An error occurred");
   }
 };
+
+// Legacy function for backward compatibility
+export const GetOrderProgressRemoteDataSource = GetItemProgressRemoteDataSource;

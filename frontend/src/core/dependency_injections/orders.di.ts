@@ -5,6 +5,7 @@ import { GetAllOrdersUsecase } from "@/features/orders/domain/usecases/get_all_o
 import { GetOrderByIdUsecase } from "@/features/orders/domain/usecases/get_order_by_id.usecase";
 import { UpdateOrderUsecase } from "@/features/orders/domain/usecases/update_order.usecase";
 import { DeleteOrderUsecase } from "@/features/orders/domain/usecases/delete_order.usecase";
+import { GetOrderItemsWithProgressUsecase } from "@/features/orders/domain/usecases/get_order_items_with_progress.usecase";
 
 const remoteDataSource = new OrdersRemoteDataSource();
 const dataRepository = new OrdersDataRepository(remoteDataSource);
@@ -14,6 +15,7 @@ const getOrderByIdUsecase = new GetOrderByIdUsecase(dataRepository);
 const createOrderUsecase = new CreateOrderUsecase(dataRepository);
 const updateOrderUsecase = new UpdateOrderUsecase(dataRepository);
 const deleteOrderUsecase = new DeleteOrderUsecase(dataRepository);
+const getOrderItemsWithProgressUsecase = new GetOrderItemsWithProgressUsecase(dataRepository);
 
 export {
   getAllOrdersUsecase,
@@ -21,4 +23,5 @@ export {
   createOrderUsecase,
   updateOrderUsecase,
   deleteOrderUsecase,
+  getOrderItemsWithProgressUsecase,
 };

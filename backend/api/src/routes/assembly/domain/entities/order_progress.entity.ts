@@ -1,8 +1,9 @@
-// order_progress.entity.ts
-export class OrderProgressEntity {
+// item_progress.entity.ts
+export class ItemProgressEntity {
   public readonly id_progress: string;
-  public readonly id_order: string;
+  public readonly id_order_item: string;
   public readonly id_step: number;
+  public readonly unit_number: number;
   public readonly started_at?: Date | null;
   public readonly completed_at?: Date | null;
   public readonly scanned_by?: string | null;
@@ -10,10 +11,11 @@ export class OrderProgressEntity {
   public readonly notes?: string | null;
   public readonly created_at: Date;
 
-  constructor(props: OrderProgressEntity) {
+  constructor(props: ItemProgressEntity) {
     this.id_progress = props.id_progress;
-    this.id_order = props.id_order;
+    this.id_order_item = props.id_order_item;
     this.id_step = props.id_step;
+    this.unit_number = props.unit_number;
     this.started_at = props.started_at;
     this.completed_at = props.completed_at;
     this.scanned_by = props.scanned_by;
@@ -23,12 +25,19 @@ export class OrderProgressEntity {
   }
 }
 
-export type CreateOrderProgressEntity = StrictOmit<
-  OrderProgressEntity,
+// Type for creating new progress entries
+export type CreateItemProgressEntity = StrictOmit<
+  ItemProgressEntity,
   "id_progress" | "created_at"
 >;
 
-export type UpdateOrderProgressEntity = StrictOmit<
-  OrderProgressEntity,
-  "id_progress" | "id_order" | "created_at"
+// Type for updating progress
+export type UpdateItemProgressEntity = StrictOmit<
+  ItemProgressEntity,
+  "id_progress" | "id_order_item" | "created_at"
 >;
+
+// Legacy type alias for backward compatibility
+export { ItemProgressEntity as OrderProgressEntity };
+export { CreateItemProgressEntity as CreateOrderProgressEntity };
+export { UpdateItemProgressEntity as UpdateOrderProgressEntity };

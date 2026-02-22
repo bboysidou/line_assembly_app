@@ -1,7 +1,6 @@
 // complete_step.usecase.ts
-import type { OrderProgressEntity } from "../entities/order_progress.entity";
+import type { ItemProgressEntity } from "../entities/order_progress.entity";
 import type { AssemblyDomainRepository } from "../repositories/assembly.domain.repository";
-import { BadRequestError } from "@/core/errors/custom.error";
 
 export class CompleteStepUsecase {
   private readonly _repository: AssemblyDomainRepository;
@@ -10,7 +9,7 @@ export class CompleteStepUsecase {
     this._repository = repository;
   }
 
-  async execute(id_progress: string): Promise<OrderProgressEntity> {
+  async execute(id_progress: string): Promise<ItemProgressEntity> {
     const progress = await this._repository.completeStep(id_progress);
     
     // If this was the last step (step 6), update order status to completed

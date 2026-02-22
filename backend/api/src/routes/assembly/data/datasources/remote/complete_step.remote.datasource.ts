@@ -5,27 +5,27 @@ import {
   NotFoundError,
   InternalServerError,
 } from "@/core/errors/custom.error";
-import type { OrderProgressEntity } from "../../../domain/entities/order_progress.entity";
+import type { ItemProgressEntity } from "../../../domain/entities/order_progress.entity";
 
 const COMPLETE_STEP_QUERY = `
-UPDATE order_progress
+UPDATE item_progress
 SET completed_at = NOW()
 WHERE id_progress = $1 AND completed_at IS NULL
 RETURNING *
 `;
 
 const INSERT_TIME_LOG_QUERY = `
-INSERT INTO step_time_logs (id_order, id_step, duration_seconds)
-SELECT id_order, id_step, 
+INSERT INTO step_time_logs (id_order_item, id_step, unit_number, duration_seconds)
+SELECT id_order_item, id_step, unit_number,
   EXTRACT(EPOCH FROM (NOW() - started_at))::INT
-FROM order_progress
+FROM item_progress
 WHERE id_progress = $1
 RETURNING *
 `;
 
 export const CompleteStepRemoteDataSource = async (
   id_progress: string,
-): Promise<OrderProgressEntity> => {
+): Promise<ItemProgressEntity> => {
   try {
     // First complete the step
     const result = await db_client.query(COMPLETE_STEP_QUERY, [id_progress]);

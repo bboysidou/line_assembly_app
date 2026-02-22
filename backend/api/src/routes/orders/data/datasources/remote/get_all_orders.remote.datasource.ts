@@ -7,8 +7,16 @@ import {
 import type { OrderEntity } from "../../../domain/entities/order.entity";
 
 const GET_ALL_ORDERS_QUERY = `
-SELECT * FROM orders
-ORDER BY created_at DESC
+SELECT 
+  o.*,
+  c.client_name,
+  COALESCE(COUNT(oi.id_order_item), 0)::int AS items_count,
+  COALESCE(SUM(oi.quantity), 0)::int AS total_quantity
+FROM orders o
+LEFT JOIN order_items oi ON o.id_order = oi.id_order
+LEFT JOIN clients c ON o.id_client = c.id_client
+GROUP BY o.id_order, c.client_name
+ORDER BY o.created_at DESC
 `;
 
 export const GetAllOrdersRemoteDataSource = async (): Promise<OrderEntity[]> => {

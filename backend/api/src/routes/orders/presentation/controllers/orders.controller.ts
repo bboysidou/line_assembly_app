@@ -12,6 +12,7 @@ import {
   getOrderByIdUsecase,
   updateOrderUsecase,
   deleteOrderUsecase,
+  getOrderItemsWithProgressUsecase,
 } from "@/core/dependency_injection/orders.di";
 
 export class OrdersController {
@@ -37,6 +38,20 @@ export class OrdersController {
   ) {
     try {
       const result = await getOrderByIdUsecase.execute(req.params.id_order);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET order items with progress
+  async onGetOrderItemsWithProgressController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result = await getOrderItemsWithProgressUsecase.execute(req.params.id_order);
       res.json(result);
     } catch (error) {
       next(error);

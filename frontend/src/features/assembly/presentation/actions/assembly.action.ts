@@ -1,14 +1,18 @@
 // assembly.action.ts
 import {
   getAllStepsUsecase,
-  getOrderProgressUsecase,
+  getItemProgressUsecase,
   startStepUsecase,
   completeStepUsecase,
   getStepAnalyticsUsecase,
+  startStepForAllItemsUsecase,
+  completeStepForAllItemsUsecase,
 } from "@/core/dependency_injections/assembly.di";
 import type {
   StartStepSchemaType,
   CompleteStepSchemaType,
+  StartStepForAllItemsSchemaType,
+  CompleteStepForAllItemsSchemaType,
 } from "../schemas/assembly.schema";
 import { QUERY_KEYS } from "@/core/http/type";
 
@@ -26,9 +30,9 @@ export const onGetAllStepsAction = async () => {
   }
 };
 
-export const onGetOrderProgressAction = async (id_order: string) => {
+export const onGetItemProgressAction = async (id_order_item: string) => {
   try {
-    return await getOrderProgressUsecase.execute(id_order);
+    return await getItemProgressUsecase.execute(id_order_item);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";
@@ -50,15 +54,16 @@ export const onGetStepAnalyticsAction = async (
   }
 };
 
-// Mutation Actions
+// Mutation Actions - Single Item Unit
 export const onStartStepAction = async (data: StartStepSchemaType) => {
   try {
     return await startStepUsecase.execute(
-      data.id_order,
+      data.id_order_item,
       data.id_step,
-      data.scanned_by,
-      data.barcode,
-      data.notes,
+      data.unit_number,
+      data.scanned_by ?? undefined,
+      data.barcode ?? undefined,
+      data.notes ?? undefined,
     );
   } catch (error) {
     const message =
@@ -70,6 +75,36 @@ export const onStartStepAction = async (data: StartStepSchemaType) => {
 export const onCompleteStepAction = async (data: CompleteStepSchemaType) => {
   try {
     return await completeStepUsecase.execute(data.id_progress);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "An unexpected error occurred";
+    throw new Error(message);
+  }
+};
+
+// Mutation Actions - Bulk (All items in an order)
+export const onStartStepForAllItemsAction = async (data: StartStepForAllItemsSchemaType) => {
+  try {
+    return await startStepForAllItemsUsecase.execute(
+      data.id_order,
+      data.id_step,
+      data.scanned_by ?? undefined,
+      data.barcode ?? undefined,
+      data.notes ?? undefined,
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "An unexpected error occurred";
+    throw new Error(message);
+  }
+};
+
+export const onCompleteStepForAllItemsAction = async (data: CompleteStepForAllItemsSchemaType) => {
+  try {
+    return await completeStepForAllItemsUsecase.execute(
+      data.id_order,
+      data.id_step,
+    );
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";

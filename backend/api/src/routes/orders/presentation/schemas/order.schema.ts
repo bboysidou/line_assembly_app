@@ -4,7 +4,7 @@ import { z } from "zod";
 // Base schema with all fields
 export const orderSchema = z.object({
   id_order: z.string({ message: "ID is required" }),
-  id_client: z.string().nullable().optional(),
+  id_client: z.string({ message: "Client is required" }),
   order_number: z.string({ message: "Order number is required" }),
   product_name: z.string({ message: "Product name is required" }),
   quantity: z.number({ message: "Quantity is required" }).min(1, "Quantity must be at least 1"),
@@ -14,15 +14,17 @@ export const orderSchema = z.object({
   updated_at: z.date().optional(),
 });
 
-// Schema for creating new orders (excludes auto-generated fields)
-export const createOrderSchema = orderSchema.omit({
-  id_order: true,
-  created_at: true,
-  updated_at: true,
+// Schema for creating new orders (order_number and status are auto-set)
+export const createOrderSchema = z.object({
+  id_client: z.string({ message: "Client is required" }).min(1, "Client is required"),
+  notes: z.string().nullable().optional(),
 });
 
 // Schema for updating orders (includes id, excludes timestamps)
-export const updateOrderSchema = orderSchema.omit({
+// Make order_number nullable to handle legacy data
+export const updateOrderSchema = orderSchema.extend({
+  order_number: z.string().nullable().optional(),
+}).omit({
   created_at: true,
   updated_at: true,
 });

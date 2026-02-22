@@ -5,6 +5,7 @@ import type {
 } from "../../domain/entities/order.entity";
 import type { OrdersDomainRepository } from "../../domain/repositories/orders.domain.repository";
 import type { OrdersRemoteDataSource } from "../datasources/orders.remote.datasource";
+import type { OrderItemWithProgressEntity } from "@/features/order_items/domain/entities/order_item_with_progress.entity";
 
 export class OrdersDataRepository implements OrdersDomainRepository {
   private readonly _remoteDataSource: OrdersRemoteDataSource;
@@ -26,6 +27,16 @@ export class OrdersDataRepository implements OrdersDomainRepository {
   async getOrderById(id_order: string): Promise<OrderEntity> {
     try {
       return await this._remoteDataSource.onGetOrderById(id_order);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      throw new Error(message);
+    }
+  }
+
+  async getOrderItemsWithProgress(id_order: string): Promise<OrderItemWithProgressEntity[]> {
+    try {
+      return await this._remoteDataSource.onGetOrderItemsWithProgress(id_order);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

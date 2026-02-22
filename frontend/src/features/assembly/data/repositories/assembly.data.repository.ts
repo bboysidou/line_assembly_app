@@ -1,5 +1,5 @@
 import type { AssemblyStepEntity } from "../../domain/entities/assembly_step.entity";
-import type { OrderProgressEntity } from "../../domain/entities/order_progress.entity";
+import type { ItemProgressEntity } from "../../domain/entities/item_progress.entity";
 import type { AssemblyDomainRepository } from "../../domain/repositories/assembly.domain.repository";
 import type { AssemblyRemoteDataSource } from "../datasources/assembly.remote.datasource";
 
@@ -20,9 +20,9 @@ export class AssemblyDataRepository implements AssemblyDomainRepository {
     }
   }
 
-  async getOrderProgress(id_order: string): Promise<OrderProgressEntity[]> {
+  async getItemProgress(id_order_item: string): Promise<ItemProgressEntity[]> {
     try {
-      return await this._remoteDataSource.onGetOrderProgress(id_order);
+      return await this._remoteDataSource.onGetItemProgress(id_order_item);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";
@@ -49,14 +49,48 @@ export class AssemblyDataRepository implements AssemblyDomainRepository {
   }
 
   async startStep(
+    id_order_item: string,
+    id_step: number,
+    unit_number: number,
+    scanned_by?: string,
+    barcode?: string,
+    notes?: string,
+  ): Promise<ItemProgressEntity> {
+    try {
+      return await this._remoteDataSource.onStartStep({
+        id_order_item,
+        id_step,
+        unit_number,
+        scanned_by,
+        barcode,
+        notes,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      throw new Error(message);
+    }
+  }
+
+  async completeStep(id_progress: string): Promise<ItemProgressEntity> {
+    try {
+      return await this._remoteDataSource.onCompleteStep(id_progress);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      throw new Error(message);
+    }
+  }
+
+  async startStepForAllItems(
     id_order: string,
     id_step: number,
     scanned_by?: string,
     barcode?: string,
     notes?: string,
-  ): Promise<OrderProgressEntity> {
+  ): Promise<ItemProgressEntity[]> {
     try {
-      return await this._remoteDataSource.onStartStep({
+      return await this._remoteDataSource.onStartStepForAllItems({
         id_order,
         id_step,
         scanned_by,
@@ -70,9 +104,15 @@ export class AssemblyDataRepository implements AssemblyDomainRepository {
     }
   }
 
-  async completeStep(id_progress: string): Promise<OrderProgressEntity> {
+  async completeStepForAllItems(
+    id_order: string,
+    id_step: number,
+  ): Promise<ItemProgressEntity[]> {
     try {
-      return await this._remoteDataSource.onCompleteStep(id_progress);
+      return await this._remoteDataSource.onCompleteStepForAllItems({
+        id_order,
+        id_step,
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

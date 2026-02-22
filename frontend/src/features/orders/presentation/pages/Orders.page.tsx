@@ -1,19 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -21,14 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   Table,
   TableBody,
@@ -56,18 +40,14 @@ import {
   Filter,
   Calendar,
   Hash,
+  User,
 } from "lucide-react";
 import {
   onGetAllOrdersAction,
-  onCreateOrderAction,
-  onUpdateOrderAction,
   onDeleteOrderAction,
 } from "../actions/orders.action";
-import {
-  createOrderSchema,
-  type CreateOrderSchemaType,
-  type UpdateOrderSchemaType,
-} from "../schemas/order.schema";
+import { type OrderSchemaType } from "../schemas/order.schema";
+import { PathManager } from "@/core/routes/path_manager.route";
 
 const statusConfig = {
   pending: { bg: "bg-warning/10", text: "text-warning", border: "border-warning/30", label: "Pending", dot: "bg-warning" },
@@ -77,55 +57,17 @@ const statusConfig = {
 };
 
 const OrdersPage = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingOrder, setEditingOrder] = useState<UpdateOrderSchemaType | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortField, setSortField] = useState<"order_number" | "product_name" | "quantity" | "created_at">("created_at");
+  const [sortField, setSortField] = useState<"order_number" | "items_count" | "total_quantity" | "created_at">("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-  const form = useForm<CreateOrderSchemaType>({
-    resolver: zodResolver(createOrderSchema),
-    defaultValues: {
-      order_number: "",
-      product_name: "",
-      quantity: 1,
-      status: "pending",
-    },
-  });
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: onGetAllOrdersAction,
     refetchOnMount: true,
-  });
-
-  const createMutation = useMutation({
-    mutationFn: onCreateOrderAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      setIsDialogOpen(false);
-      form.reset();
-      toast.success("Order created successfully");
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to create order", { description: error.message });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: onUpdateOrderAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      setIsDialogOpen(false);
-      setEditingOrder(null);
-      form.reset();
-      toast.success("Order updated successfully");
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to update order", { description: error.message });
-    },
   });
 
   const deleteMutation = useMutation({
@@ -139,37 +81,15 @@ const OrdersPage = () => {
     },
   });
 
-  const onSubmit = (data: CreateOrderSchemaType) => {
-    // Convert empty strings to null for nullable fields
-    const processedData = {
-      ...data,
-      id_client: data.id_client || null,
-      notes: data.notes || null,
-    };
-    
-    if (editingOrder) {
-      updateMutation.mutate({ ...editingOrder, ...processedData });
-    } else {
-      createMutation.mutate(processedData);
-    }
-  };
-
-  const handleEdit = (order: UpdateOrderSchemaType) => {
-    setEditingOrder(order);
-    form.reset({
-      order_number: order.order_number,
-      product_name: order.product_name,
-      quantity: order.quantity,
-      status: order.status,
-    });
-    setIsDialogOpen(true);
+  const handleEdit = (orderId: string) => {
+    navigate(`${PathManager.ORDERS_EDIT_PAGE}?id=${orderId}`);
   };
 
   const handleDelete = (id: string) => {
     if (confirm("Delete this order?")) deleteMutation.mutate(id);
   };
 
-  const handleSort = (field: "order_number" | "product_name" | "quantity" | "created_at") => {
+  const handleSort = (field: "order_number" | "items_count" | "total_quantity" | "created_at") => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -180,13 +100,12 @@ const OrdersPage = () => {
 
   const filteredOrders = orders?.filter((order) => {
     const matchesSearch =
-      order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.product_name.toLowerCase().includes(searchQuery.toLowerCase());
+      order.order_number.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
-    const aVal = (a[sortField] ?? "") as string | number;
-    const bVal = (b[sortField] ?? "") as string | number;
+    const aVal = (a[sortField] ?? 0) as string | number;
+    const bVal = (b[sortField] ?? 0) as string | number;
     if (sortField === "created_at") {
       const aDate = aVal ? new Date(aVal as string).getTime() : 0;
       const bDate = bVal ? new Date(bVal as string).getTime() : 0;
@@ -200,7 +119,7 @@ const OrdersPage = () => {
   const processingCount = orders?.filter((o) => o.status === "in_progress").length || 0;
   const completedCount = orders?.filter((o) => o.status === "completed").length || 0;
 
-  const SortIcon = ({ field }: { field: "order_number" | "product_name" | "quantity" | "created_at" }) => {
+  const SortIcon = ({ field }: { field: "order_number" | "items_count" | "total_quantity" | "created_at" }) => {
     if (sortField !== field) return null;
     return sortOrder === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
   };
@@ -227,117 +146,12 @@ const OrdersPage = () => {
           </h1>
           <p className="text-muted-foreground mt-1">Manage production orders</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) {
-            setEditingOrder(null);
-            form.reset({
-              order_number: "",
-              product_name: "",
-              quantity: 1,
-              status: "pending",
-            });
-          }
-        }}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setEditingOrder(null);
-                form.reset({
-                  order_number: "",
-                  product_name: "",
-                  quantity: 1,
-                  status: "pending",
-                });
-              }}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
-            >
-              <Plus className="w-4 h-4 mr-2" /> New Order
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50">
-            <DialogHeader>
-              <DialogTitle className="text-xl">{editingOrder ? "Edit Order" : "New Order"}</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="order_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Order Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter order number" className="bg-background/50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="product_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Product Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter product name" className="bg-background/50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantity</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="1"
-                          placeholder="Enter quantity"
-                          className="bg-background/50"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-background/50 border-border/50">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="in_progress">In Progress</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                  {editingOrder ? "Update" : "Add"} Order
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        <Button
+          onClick={() => navigate(PathManager.ORDERS_CREATE_PAGE)}
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+        >
+          <Plus className="w-4 h-4 mr-2" /> New Order
+        </Button>
       </motion.div>
 
       {/* Stats Cards */}
@@ -457,17 +271,18 @@ const OrdersPage = () => {
                     >
                       <div className="flex items-center">Order # <SortIcon field="order_number" /></div>
                     </TableHead>
+                    <TableHead className="font-semibold">Client</TableHead>
                     <TableHead
                       className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
-                      onClick={() => handleSort("product_name")}
+                      onClick={() => handleSort("items_count")}
                     >
-                      <div className="flex items-center">Product <SortIcon field="product_name" /></div>
+                      <div className="flex items-center">Items <SortIcon field="items_count" /></div>
                     </TableHead>
                     <TableHead
                       className="cursor-pointer select-none font-semibold hover:text-primary transition-colors"
-                      onClick={() => handleSort("quantity")}
+                      onClick={() => handleSort("total_quantity")}
                     >
-                      <div className="flex items-center">Qty <SortIcon field="quantity" /></div>
+                      <div className="flex items-center">Total Qty <SortIcon field="total_quantity" /></div>
                     </TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
                     <TableHead
@@ -482,7 +297,7 @@ const OrdersPage = () => {
                 <TableBody>
                   {filteredOrders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-16">
+                      <TableCell colSpan={8} className="text-center py-16">
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                           <Package className="w-12 h-12 opacity-20" />
                           <p>{searchQuery || statusFilter !== "all" ? "No orders found matching your filters" : "No orders yet"}</p>
@@ -506,11 +321,26 @@ const OrdersPage = () => {
                               <span className="font-medium">{order.order_number}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium">{order.product_name}</TableCell>
+                          <TableCell>
+                            {order.client_name ? (
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm">{order.client_name}</span>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Package className="w-4 h-4 opacity-50" />
+                              {order.items_count ?? 0} items
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <Hash className="w-4 h-4 opacity-50" />
-                              {order.quantity} units
+                              {order.total_quantity ?? 0} units
                             </div>
                           </TableCell>
                           <TableCell>
@@ -533,7 +363,10 @@ const OrdersPage = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="bg-card/95 backdrop-blur-xl border-border/50">
-                                <DropdownMenuItem onClick={() => handleEdit(order)} className="cursor-pointer">
+                                <DropdownMenuItem onClick={() => navigate(`/orders/${order.id_order}`)} className="cursor-pointer">
+                                  <Package className="w-4 h-4 mr-2" /> View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEdit(order.id_order)} className="cursor-pointer">
                                   <Pencil className="w-4 h-4 mr-2" /> Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleDelete(order.id_order)} className="cursor-pointer text-destructive focus:text-destructive">
