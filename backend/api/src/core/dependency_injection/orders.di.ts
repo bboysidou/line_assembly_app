@@ -16,7 +16,7 @@ const getAllOrdersUsecase = new GetAllOrdersUsecase(dataRepository);
 const getOrderByIdUsecase = new GetOrderByIdUsecase(dataRepository);
 const updateOrderUsecase = new UpdateOrderUsecase(dataRepository);
 const deleteOrderUsecase = new DeleteOrderUsecase(dataRepository);
-const getOrderItemsWithProgressUsecase = new GetOrderItemsWithProgressUsecase();
+const getOrderItemsWithProgressUsecase = new GetOrderItemsWithProgressUsecase(dataRepository);
 
 // Export use cases for controller injection
 export {

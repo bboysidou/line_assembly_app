@@ -118,7 +118,7 @@ const AuthPage = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="w-full max-w-md z-10"
       >
-        <Card className="border-border/50 bg-card/80 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <Card className="border-border/50 dark:border-zinc-800 bg-card/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-2xl overflow-hidden">
           {/* Gradient accent bar */}
           <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary" />
           

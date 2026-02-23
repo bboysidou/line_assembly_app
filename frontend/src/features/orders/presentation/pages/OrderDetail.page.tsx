@@ -103,7 +103,7 @@ const ItemLogCard = ({
   };
 
   return (
-    <Card className="mb-3 border-l-4 border-l-primary/30 hover:border-l-primary/60 hover:shadow-md transition-all duration-200">
+    <Card className="mb-3 border-l-4 border-l-primary/30 hover:border-l-primary/60 hover:shadow-md transition-all duration-200 dark:border-zinc-800 dark:bg-zinc-900/50">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -402,7 +402,7 @@ const OrderDetailPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden h-full">
+              <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden h-full">
                 <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -444,7 +444,7 @@ const OrderDetailPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden h-full">
+              <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden h-full">
                 <div className="h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -504,7 +504,7 @@ const OrderDetailPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+            <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -543,7 +543,7 @@ const OrderDetailPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+              <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
                 <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg flex items-center gap-2">

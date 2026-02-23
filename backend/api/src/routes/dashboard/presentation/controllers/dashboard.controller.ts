@@ -1,20 +1,19 @@
-// dashboard.controller.ts
 import type { NextFunction, Request, Response } from "express";
 import {
-  GetDashboardMetricsUsecase,
-  GetOrdersTrendUsecase,
-  GetStepPerformanceUsecase,
-  GetStepAnalyticsUsecase,
+  getDashboardMetricsUsecase,
+  getOrdersTrendUsecase,
+  getStepPerformanceUsecase,
+  getStepAnalyticsUsecase,
 } from "@/core/dependency_injection/dashboard.di";
 
 export class DashboardController {
   async onGetDashboardMetricsController(
-    req: Request,
+    _: Request,
     res: Response,
     next: NextFunction,
   ) {
     try {
-      const result = await GetDashboardMetricsUsecase.execute();
+      const result = await getDashboardMetricsUsecase.execute();
       res.json(result);
     } catch (error) {
       next(error);
@@ -28,7 +27,7 @@ export class DashboardController {
   ) {
     try {
       const { period } = req.query;
-      const result = await GetOrdersTrendUsecase.execute(
+      const result = await getOrdersTrendUsecase.execute(
         (period as string) || "week",
       );
       res.json(result);
@@ -38,12 +37,12 @@ export class DashboardController {
   }
 
   async onGetStepPerformanceController(
-    req: Request,
+    _: Request,
     res: Response,
     next: NextFunction,
   ) {
     try {
-      const result = await GetStepPerformanceUsecase.execute();
+      const result = await getStepPerformanceUsecase.execute();
       res.json(result);
     } catch (error) {
       next(error);
@@ -58,12 +57,12 @@ export class DashboardController {
     try {
       const { id_step, start_date, end_date } = req.query;
       const parsedIdStep = parseInt(id_step as string);
-      
+
       if (isNaN(parsedIdStep)) {
         return res.status(400).json({ error: "Invalid id_step parameter" });
       }
-      
-      const result = await GetStepAnalyticsUsecase.execute(
+
+      const result = await getStepAnalyticsUsecase.execute(
         parsedIdStep,
         start_date as string,
         end_date as string,

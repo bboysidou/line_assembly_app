@@ -290,7 +290,7 @@ const CreateEditOrderPage = () => {
           transition={{ delay: 0.1 }}
         >
           {/* Client Selection */}
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -373,7 +373,7 @@ const CreateEditOrderPage = () => {
           </Card>
 
           {/* Order Items */}
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
@@ -536,7 +536,7 @@ const CreateEditOrderPage = () => {
 
           {/* Status (only for editing) */}
           {isEditing && (
-            <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+            <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -579,7 +579,7 @@ const CreateEditOrderPage = () => {
           )}
 
           {/* Additional Notes */}
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-info to-cyan-500" />
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -642,7 +642,7 @@ const CreateEditOrderPage = () => {
           transition={{ delay: 0.2 }}
         >
           {/* Order Preview Card */}
-          <Card className="border-border/50 bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm sticky top-6">
+          <Card className="border-border/50 dark:border-zinc-800 bg-gradient-to-br from-card/50 to-card/30 dark:from-zinc-900 dark:to-zinc-950 backdrop-blur-sm sticky top-6">
             <div className="h-1 bg-gradient-to-r from-success via-emerald-500 to-teal-500" />
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -743,7 +743,7 @@ const CreateEditOrderPage = () => {
           </Card>
 
           {/* Action Buttons */}
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm">
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm">
             <CardContent className="pt-6 space-y-3">
               {isEditing ? (
                 <Button

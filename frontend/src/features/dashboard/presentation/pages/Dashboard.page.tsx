@@ -192,7 +192,7 @@ const DashboardPage = () => {
         variants={cardVariants}
       >
         {/* Total Clients Card */}
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+        <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center justify-between">
@@ -215,7 +215,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* Total Orders Card */}
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+        <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center justify-between">
@@ -238,7 +238,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* In Progress Card */}
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+        <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center justify-between">
@@ -261,7 +261,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* Completed Card */}
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group">
+        <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center justify-between">
@@ -307,7 +307,7 @@ const DashboardPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Orders Bar Chart */}
-          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Package className="w-5 h-5 text-primary" /> Orders Overview
@@ -363,7 +363,7 @@ const DashboardPage = () => {
           </Card>
 
           {/* Orders Trend */}
-          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <TrendingUp className="w-5 h-5 text-primary" /> Orders Trend
@@ -447,7 +447,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Step Selection */}
-        <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Clock className="w-5 h-5 text-primary" /> Average Time per Step
@@ -511,7 +511,7 @@ const DashboardPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Step Progress Chart */}
-          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Activity className="w-5 h-5 text-primary" /> Step Progression -{" "}
@@ -599,7 +599,7 @@ const DashboardPage = () => {
           </Card>
 
           {/* Step Performance */}
-          <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="card-hover border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <TrendingUp className="w-5 h-5 text-primary" /> Step Performance

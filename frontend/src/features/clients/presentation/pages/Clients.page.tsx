@@ -143,7 +143,7 @@ const ClientsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
+        <Card className="relative overflow-hidden border-border/50 dark:border-zinc-800 bg-gradient-to-br from-card to-card/50 dark:from-zinc-900 dark:to-zinc-950 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
@@ -157,7 +157,7 @@ const ClientsPage = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-lg hover:shadow-info/5 transition-all duration-300 group">
+        <Card className="relative overflow-hidden border-border/50 dark:border-zinc-800 bg-gradient-to-br from-card to-card/50 dark:from-zinc-900 dark:to-zinc-950 hover:shadow-lg hover:shadow-info/5 transition-all duration-300 group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-info/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
@@ -171,7 +171,7 @@ const ClientsPage = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-lg hover:shadow-success/5 transition-all duration-300 group">
+        <Card className="relative overflow-hidden border-border/50 dark:border-zinc-800 bg-gradient-to-br from-card to-card/50 dark:from-zinc-900 dark:to-zinc-950 hover:shadow-lg hover:shadow-success/5 transition-all duration-300 group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-success/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
@@ -193,7 +193,7 @@ const ClientsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="border-border/50 bg-card/50">
+        <Card className="border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50">
           <CardContent className="pt-4 pb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -214,7 +214,7 @@ const ClientsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <Card className="border-border/50 bg-card/50 overflow-hidden">
+        <Card className="border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-muted/50 to-muted/30 border-b border-border/50 py-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />

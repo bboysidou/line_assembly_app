@@ -221,7 +221,7 @@ const CreateEditClientPage = () => {
           transition={{ delay: 0.1 }}
         >
           {/* Basic Information */}
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -440,7 +440,7 @@ const CreateEditClientPage = () => {
           transition={{ delay: 0.2 }}
         >
           {/* Client Preview Card */}
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden sticky top-6">
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/30 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden sticky top-6">
             <div className="h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">

@@ -5,10 +5,12 @@ import { DashboardController } from "./controllers/dashboard.controller";
 const router = Router();
 const controller = new DashboardController();
 
-// Dashboard metrics endpoints
 router.get("/metrics", controller.onGetDashboardMetricsController);
 router.get("/orders/trend", controller.onGetOrdersTrendController);
-router.get("/assembly/step-performance", controller.onGetStepPerformanceController);
+router.get(
+  "/assembly/step-performance",
+  controller.onGetStepPerformanceController,
+);
 router.get("/assembly/step-analytics", controller.onGetStepAnalyticsController);
 
 export { router as dashboardRouter };

@@ -9,11 +9,13 @@ import type {
   OrderEntity,
 } from "../../domain/entities/order.entity";
 import type { OrdersDomainRepository } from "../../domain/repositories/orders.domain.repository";
+import type { OrderItemWithProgressType } from "@/routes/order_items/domain/entities/order_item_with_progress.entity";
 import { CreateOrderRemoteDataSource } from "../datasources/remote/create_order.remote.datasource";
 import { GetAllOrdersRemoteDataSource } from "../datasources/remote/get_all_orders.remote.datasource";
 import { GetOrderByIdRemoteDataSource } from "../datasources/remote/get_order_by_id.remote.datasource";
 import { UpdateOrderRemoteDataSource } from "../datasources/remote/update_order.remote.datasource";
 import { DeleteOrderRemoteDataSource } from "../datasources/remote/delete_order.remote.datasource";
+import { GetOrderItemsWithProgressRemoteDataSource } from "../datasources/remote/get_order_items_with_progress.remote.datasource";
 
 export class OrdersDataRepository implements OrdersDomainRepository {
   async getAllOrders(): Promise<OrderEntity[]> {
@@ -57,6 +59,18 @@ export class OrdersDataRepository implements OrdersDomainRepository {
     try {
       const orders = await GetAllOrdersRemoteDataSource();
       return orders.filter(order => order.status === status);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof BadRequestError) {
+        throw new BadRequestError(error.message);
+      }
+      throw new InternalServerError("An error occurred");
+    }
+  }
+
+  async getOrderItemsWithProgress(id_order: string): Promise<OrderItemWithProgressType[]> {
+    try {
+      return await GetOrderItemsWithProgressRemoteDataSource(id_order);
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestError) {
