@@ -16,10 +16,28 @@ import { QUERY_KEYS } from "@/core/http/type";
 // Query Keys - Export for use in components
 export const orderKeys = QUERY_KEYS.ORDERS;
 
+// Pagination response type
+export interface PaginatedOrdersActionResponse {
+  data: OrderSchemaType[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 // Query Actions
-export const onGetAllOrdersAction = async (): Promise<OrderSchemaType[]> => {
+export const onGetAllOrdersAction = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<PaginatedOrdersActionResponse> => {
   try {
-    return await getAllOrdersUsecase.execute() as unknown as OrderSchemaType[];
+    const result = await getAllOrdersUsecase.execute(page, limit);
+    return {
+      data: result.data as unknown as OrderSchemaType[],
+      pagination: result.pagination,
+    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";

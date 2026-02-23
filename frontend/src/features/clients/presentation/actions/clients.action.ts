@@ -16,10 +16,28 @@ import { QUERY_KEYS } from "@/core/http/type";
 // Query Keys - Export for use in components
 export const clientKeys = QUERY_KEYS.CLIENTS;
 
+// Pagination response type
+export interface PaginatedClientsActionResponse {
+  data: ClientSchemaType[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 // Query Actions
-export const onGetAllClientsAction = async (): Promise<ClientSchemaType[]> => {
+export const onGetAllClientsAction = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<PaginatedClientsActionResponse> => {
   try {
-    return await getAllClientsUsecase.execute();
+    const result = await getAllClientsUsecase.execute(page, limit);
+    return {
+      data: result.data as unknown as ClientSchemaType[],
+      pagination: result.pagination,
+    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";

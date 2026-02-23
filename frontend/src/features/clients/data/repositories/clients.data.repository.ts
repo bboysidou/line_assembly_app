@@ -4,7 +4,7 @@ import type {
   UpdateClientEntity,
   ClientEntity,
 } from "../../domain/entities/client.entity";
-import type { ClientsDomainRepository } from "../../domain/repositories/clients.domain.repository";
+import type { ClientsDomainRepository, PaginatedClientsResponse } from "../../domain/repositories/clients.domain.repository";
 import type { ClientsRemoteDataSource } from "../datasources/clients.remote.datasource";
 
 export class ClientsDataRepository implements ClientsDomainRepository {
@@ -14,9 +14,9 @@ export class ClientsDataRepository implements ClientsDomainRepository {
     this._remoteDataSource = remoteDataSource;
   }
 
-  async getAllClients(): Promise<ClientEntity[]> {
+  async getAllClients(page: number = 1, limit: number = 10): Promise<PaginatedClientsResponse> {
     try {
-      return await this._remoteDataSource.onGetAllClients();
+      return await this._remoteDataSource.onGetAllClients(page, limit);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

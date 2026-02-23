@@ -8,10 +8,23 @@ import type {
 
 const BASE_URL = "/clients";
 
+// Pagination response type
+export interface PaginatedClientsResponse {
+  data: ClientEntity[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export class ClientsRemoteDataSource {
-  async onGetAllClients(): Promise<ClientEntity[]> {
+  async onGetAllClients(page: number = 1, limit: number = 10): Promise<PaginatedClientsResponse> {
     try {
-      return await httpPublic.get<ClientEntity[]>(`${BASE_URL}/`);
+      return await httpPublic.get<PaginatedClientsResponse>(
+        `${BASE_URL}/?page=${page}&limit=${limit}`,
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

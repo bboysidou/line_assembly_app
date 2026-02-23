@@ -8,7 +8,7 @@ import type {
   UpdateOrderEntity,
   OrderEntity,
 } from "../../domain/entities/order.entity";
-import type { OrdersDomainRepository } from "../../domain/repositories/orders.domain.repository";
+import type { OrdersDomainRepository, PaginatedOrdersResponse } from "../../domain/repositories/orders.domain.repository";
 import type { OrderItemWithProgressType } from "@/routes/order_items/domain/entities/order_item_with_progress.entity";
 import { CreateOrderRemoteDataSource } from "../datasources/remote/create_order.remote.datasource";
 import { GetAllOrdersRemoteDataSource } from "../datasources/remote/get_all_orders.remote.datasource";
@@ -18,9 +18,9 @@ import { DeleteOrderRemoteDataSource } from "../datasources/remote/delete_order.
 import { GetOrderItemsWithProgressRemoteDataSource } from "../datasources/remote/get_order_items_with_progress.remote.datasource";
 
 export class OrdersDataRepository implements OrdersDomainRepository {
-  async getAllOrders(): Promise<OrderEntity[]> {
+  async getAllOrders(page: number = 1, limit: number = 10): Promise<PaginatedOrdersResponse> {
     try {
-      return await GetAllOrdersRemoteDataSource();
+      return await GetAllOrdersRemoteDataSource(page, limit);
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestError) {
@@ -44,8 +44,9 @@ export class OrdersDataRepository implements OrdersDomainRepository {
 
   async getOrdersByClient(id_client: string): Promise<OrderEntity[]> {
     try {
-      const orders = await GetAllOrdersRemoteDataSource();
-      return orders.filter(order => order.id_client === id_client);
+      // Get all orders with a large limit to filter by client
+      const result = await GetAllOrdersRemoteDataSource(1, 1000);
+      return result.data.filter(order => order.id_client === id_client);
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestError) {
@@ -57,8 +58,9 @@ export class OrdersDataRepository implements OrdersDomainRepository {
 
   async getOrdersByStatus(status: string): Promise<OrderEntity[]> {
     try {
-      const orders = await GetAllOrdersRemoteDataSource();
-      return orders.filter(order => order.status === status);
+      // Get all orders with a large limit to filter by status
+      const result = await GetAllOrdersRemoteDataSource(1, 1000);
+      return result.data.filter(order => order.status === status);
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestError) {

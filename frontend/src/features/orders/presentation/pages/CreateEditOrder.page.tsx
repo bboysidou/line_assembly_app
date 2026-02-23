@@ -128,11 +128,14 @@ const CreateEditOrderPage = () => {
   // Watch form values for preview
   const watchedValues = isEditing ? editForm.watch() : createForm.watch();
 
-  // Fetch clients for dropdown
-  const { data: clients, isLoading: clientsLoading } = useQuery({
-    queryKey: ["clients"],
-    queryFn: onGetAllClientsAction,
+  // Fetch clients for dropdown (with large limit to get all clients for dropdown)
+  const { data: clientsResponse, isLoading: clientsLoading } = useQuery({
+    queryKey: ["clients", 1, 1000],
+    queryFn: () => onGetAllClientsAction(1, 1000),
   });
+  
+  // Extract clients data from paginated response
+  const clients = clientsResponse?.data;
 
   // Fetch order data if editing
   const { data: orderData, isLoading: orderLoading } = useQuery({

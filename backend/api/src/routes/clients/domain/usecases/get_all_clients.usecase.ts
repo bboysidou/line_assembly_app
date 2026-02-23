@@ -1,5 +1,5 @@
 // get_all_clients.usecase.ts
-import type { ClientEntity } from "../entities/client.entity";
+import type { PaginatedClientsResponse } from "../repositories/clients.domain.repository";
 import type { ClientsDomainRepository } from "../repositories/clients.domain.repository";
 
 export class GetAllClientsUsecase {
@@ -9,7 +9,7 @@ export class GetAllClientsUsecase {
     this._repository = repository;
   }
 
-  async execute(): Promise<ClientEntity[]> {
-    return this._repository.getAllClients();
+  async execute(page: number = 1, limit: number = 10): Promise<PaginatedClientsResponse> {
+    return this._repository.getAllClients(page, limit);
   }
 }

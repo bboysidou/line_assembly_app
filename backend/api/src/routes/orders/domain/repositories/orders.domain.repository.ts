@@ -6,9 +6,20 @@ import type {
 } from "../entities/order.entity";
 import type { OrderItemWithProgressType } from "@/routes/order_items/domain/entities/order_item_with_progress.entity";
 
+// Pagination response type
+export interface PaginatedOrdersResponse {
+  data: OrderEntity[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export interface OrdersDomainRepository {
   // Query Operations (Read)
-  getAllOrders(): Promise<OrderEntity[]>;
+  getAllOrders(page?: number, limit?: number): Promise<PaginatedOrdersResponse>;
   getOrderById(id_order: string): Promise<OrderEntity>;
   getOrdersByClient(id_client: string): Promise<OrderEntity[]>;
   getOrdersByStatus(status: string): Promise<OrderEntity[]>;

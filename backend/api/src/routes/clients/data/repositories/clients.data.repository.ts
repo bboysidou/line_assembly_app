@@ -8,7 +8,7 @@ import type {
   UpdateClientEntity,
   ClientEntity,
 } from "../../domain/entities/client.entity";
-import type { ClientsDomainRepository } from "../../domain/repositories/clients.domain.repository";
+import type { ClientsDomainRepository, PaginatedClientsResponse } from "../../domain/repositories/clients.domain.repository";
 import { CreateClientRemoteDataSource } from "../datasources/remote/create_client.remote.datasource";
 import { GetAllClientsRemoteDataSource } from "../datasources/remote/get_all_clients.remote.datasource";
 import { GetClientByIdRemoteDataSource } from "../datasources/remote/get_client_by_id.remote.datasource";
@@ -16,9 +16,9 @@ import { UpdateClientRemoteDataSource } from "../datasources/remote/update_clien
 import { DeleteClientRemoteDataSource } from "../datasources/remote/delete_client.remote.datasource";
 
 export class ClientsDataRepository implements ClientsDomainRepository {
-  async getAllClients(): Promise<ClientEntity[]> {
+  async getAllClients(page: number = 1, limit: number = 10): Promise<PaginatedClientsResponse> {
     try {
-      return await GetAllClientsRemoteDataSource();
+      return await GetAllClientsRemoteDataSource(page, limit);
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestError) {

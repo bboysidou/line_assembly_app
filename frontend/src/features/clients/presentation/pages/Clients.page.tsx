@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -35,12 +42,16 @@ import {
   Mail,
   Phone,
   MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   onGetAllClientsAction,
   onDeleteClientAction,
 } from "../actions/clients.action";
 import { PathManager } from "@/core/routes/path_manager.route";
+
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
 
 const ClientsPage = () => {
   const navigate = useNavigate();
@@ -49,9 +60,13 @@ const ClientsPage = () => {
   const [sortField, setSortField] = useState<"client_name" | "client_email" | "created_at">("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ["clients"],
-    queryFn: onGetAllClientsAction,
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const { data: clientsResponse, isLoading } = useQuery({
+    queryKey: ["clients", page, limit],
+    queryFn: () => onGetAllClientsAction(page, limit),
     refetchOnMount: true,
   });
 
@@ -83,6 +98,10 @@ const ClientsPage = () => {
     }
   };
 
+  // Extract clients and pagination from response
+  const clients = clientsResponse?.data || [];
+  const pagination = clientsResponse?.pagination;
+
   const filteredClients = clients?.filter((client) =>
     client.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.client_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -104,6 +123,16 @@ const ClientsPage = () => {
   const SortIcon = ({ field }: { field: "client_name" | "client_email" | "created_at" }) => {
     if (sortField !== field) return null;
     return sortOrder === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleLimitChange = (newLimit: string) => {
+    setLimit(parseInt(newLimit));
+    setPage(1); // Reset to first page when changing limit
   };
 
   if (isLoading) {
@@ -152,7 +181,7 @@ const ClientsPage = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Clients</p>
-                <p className="text-3xl font-bold">{clients?.length || 0}</p>
+                <p className="text-3xl font-bold">{pagination?.total || clients?.length || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -220,7 +249,7 @@ const ClientsPage = () => {
               <Users className="w-5 h-5 text-primary" />
               Clients Directory
               <span className="text-sm font-normal text-muted-foreground ml-auto">
-                {filteredClients.length} {filteredClients.length === 1 ? "client" : "clients"}
+                {pagination ? `${pagination.total} total clients` : `${filteredClients.length} ${filteredClients.length === 1 ? "client" : "clients"}`}
               </span>
             </CardTitle>
           </CardHeader>
@@ -272,7 +301,7 @@ const ClientsPage = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredClients.map((client) => (
+                    filteredClients.map((client, i) => (
                       <TableRow
                         key={client.id_client}
                         className="group hover:bg-muted/30 transition-colors"
@@ -345,6 +374,96 @@ const ClientsPage = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50">
+            <CardContent className="py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Showing</span>
+                  <span className="font-medium">
+                    {(page - 1) * limit + 1}-{Math.min(page * limit, pagination.total)}
+                  </span>
+                  <span>of</span>
+                  <span className="font-medium">{pagination.total}</span>
+                  <span>clients</span>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Per page:</span>
+                    <Select value={limit.toString()} onValueChange={handleLimitChange}>
+                      <SelectTrigger className="w-[70px] bg-background/50 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option.toString()}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      let pageNum: number;
+                      if (pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (page <= 3) {
+                        pageNum = i + 1;
+                      } else if (page >= pagination.totalPages - 2) {
+                        pageNum = pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = page - 2 + i;
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === pagination.totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 };

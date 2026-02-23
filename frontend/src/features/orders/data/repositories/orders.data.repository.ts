@@ -3,7 +3,7 @@ import type {
   UpdateOrderEntity,
   OrderEntity,
 } from "../../domain/entities/order.entity";
-import type { OrdersDomainRepository } from "../../domain/repositories/orders.domain.repository";
+import type { OrdersDomainRepository, PaginatedOrdersResponse } from "../../domain/repositories/orders.domain.repository";
 import type { OrdersRemoteDataSource } from "../datasources/orders.remote.datasource";
 import type { OrderItemWithProgressEntity } from "@/features/order_items/domain/entities/order_item_with_progress.entity";
 
@@ -14,9 +14,9 @@ export class OrdersDataRepository implements OrdersDomainRepository {
     this._remoteDataSource = remoteDataSource;
   }
 
-  async getAllOrders(): Promise<OrderEntity[]> {
+  async getAllOrders(page: number = 1, limit: number = 10): Promise<PaginatedOrdersResponse> {
     try {
-      return await this._remoteDataSource.onGetAllOrders();
+      return await this._remoteDataSource.onGetAllOrders(page, limit);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

@@ -28,7 +28,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import {
-  onGetAllClientsAction,
   onCreateClientAction,
   onUpdateClientAction,
   onGetClientByIdAction,

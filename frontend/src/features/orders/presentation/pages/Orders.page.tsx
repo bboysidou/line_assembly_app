@@ -41,6 +41,8 @@ import {
   Calendar,
   Hash,
   User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   onGetAllOrdersAction,
@@ -56,6 +58,8 @@ const statusConfig = {
   cancelled: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/30", label: "Cancelled", dot: "bg-destructive" },
 };
 
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
+
 const OrdersPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -63,10 +67,14 @@ const OrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<"order_number" | "items_count" | "total_quantity" | "created_at">("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ["orders"],
-    queryFn: onGetAllOrdersAction,
+  const { data: ordersResponse, isLoading } = useQuery({
+    queryKey: ["orders", page, limit],
+    queryFn: () => onGetAllOrdersAction(page, limit),
     refetchOnMount: true,
   });
 
@@ -98,6 +106,10 @@ const OrdersPage = () => {
     }
   };
 
+  // Extract orders and pagination from response
+  const orders = ordersResponse?.data || [];
+  const pagination = ordersResponse?.pagination;
+
   const filteredOrders = orders?.filter((order) => {
     const matchesSearch =
       order.order_number.toLowerCase().includes(searchQuery.toLowerCase());
@@ -115,6 +127,7 @@ const OrdersPage = () => {
     return sortOrder === "asc" ? comparison : -comparison;
   }) || [];
 
+  // Stats are now based on current page data only (for display purposes)
   const pendingCount = orders?.filter((o) => o.status === "pending").length || 0;
   const processingCount = orders?.filter((o) => o.status === "in_progress").length || 0;
   const completedCount = orders?.filter((o) => o.status === "completed").length || 0;
@@ -122,6 +135,16 @@ const OrdersPage = () => {
   const SortIcon = ({ field }: { field: "order_number" | "items_count" | "total_quantity" | "created_at" }) => {
     if (sortField !== field) return null;
     return sortOrder === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleLimitChange = (newLimit: string) => {
+    setLimit(parseInt(newLimit));
+    setPage(1); // Reset to first page when changing limit
   };
 
   if (isLoading) {
@@ -255,7 +278,7 @@ const OrdersPage = () => {
               <Package className="w-5 h-5 text-primary" />
               Orders Directory
               <span className="text-sm font-normal text-muted-foreground ml-auto">
-                {filteredOrders.length} {filteredOrders.length === 1 ? "order" : "orders"}
+                {pagination ? `${pagination.total} total orders` : `${filteredOrders.length} ${filteredOrders.length === 1 ? "order" : "orders"}`}
               </span>
             </CardTitle>
           </CardHeader>
@@ -312,7 +335,9 @@ const OrdersPage = () => {
                           key={order.id_order}
                           className="group hover:bg-muted/30 transition-colors border-b border-border/30"
                         >
-                          <TableCell className="text-center text-muted-foreground font-medium">{i + 1}</TableCell>
+                          <TableCell className="text-center text-muted-foreground font-medium">
+                            {(page - 1) * limit + i + 1}
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-sm">
@@ -385,6 +410,96 @@ const OrdersPage = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="border-border/50 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50">
+            <CardContent className="py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Showing</span>
+                  <span className="font-medium">
+                    {(page - 1) * limit + 1}-{Math.min(page * limit, pagination.total)}
+                  </span>
+                  <span>of</span>
+                  <span className="font-medium">{pagination.total}</span>
+                  <span>orders</span>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Per page:</span>
+                    <Select value={limit.toString()} onValueChange={handleLimitChange}>
+                      <SelectTrigger className="w-[70px] bg-background/50 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option.toString()}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      let pageNum: number;
+                      if (pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (page <= 3) {
+                        pageNum = i + 1;
+                      } else if (page >= pagination.totalPages - 2) {
+                        pageNum = pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = page - 2 + i;
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === pagination.totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 };

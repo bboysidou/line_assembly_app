@@ -8,11 +8,24 @@ import type { OrderItemWithProgressEntity } from "@/features/order_items/domain/
 
 const BASE_URL = "/orders";
 
+// Pagination response type
+export interface PaginatedOrdersResponse {
+  data: OrderEntity[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export class OrdersRemoteDataSource {
-  // GET all orders
-  async onGetAllOrders(): Promise<OrderEntity[]> {
+  // GET all orders with pagination
+  async onGetAllOrders(page: number = 1, limit: number = 10): Promise<PaginatedOrdersResponse> {
     try {
-      return await httpPublic.get<OrderEntity[]>(`${BASE_URL}/`);
+      return await httpPublic.get<PaginatedOrdersResponse>(
+        `${BASE_URL}/?page=${page}&limit=${limit}`,
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred";

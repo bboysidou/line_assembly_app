@@ -1,4 +1,4 @@
-import type { OrderEntity } from "../entities/order.entity";
+import type { PaginatedOrdersResponse } from "../repositories/orders.domain.repository";
 import type { OrdersDomainRepository } from "../repositories/orders.domain.repository";
 
 export class GetAllOrdersUsecase {
@@ -8,7 +8,7 @@ export class GetAllOrdersUsecase {
     this._repository = repository;
   }
 
-  async execute(): Promise<OrderEntity[]> {
-    return this._repository.getAllOrders();
+  async execute(page: number = 1, limit: number = 10): Promise<PaginatedOrdersResponse> {
+    return this._repository.getAllOrders(page, limit);
   }
 }
